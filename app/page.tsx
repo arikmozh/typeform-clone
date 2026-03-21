@@ -39,7 +39,8 @@ const questions: Question[] = [
     questionHe: 'גיל',
     options: ['Under 18', '18-24', '25-34', '35-44', '45+'],
     optionsHe: ['מתחת ל-18', '18-24', '25-34', '35-44', '45+'],
-    hideDescription: true
+    hideDescription: true,
+    noAutoAdvance: true
   },
   {
     id: 'gender',
@@ -98,7 +99,8 @@ const questions: Question[] = [
       'בינוני (6 חודשים-2 שנים)',
       'מתקדם (2+ שנים)'
     ],
-    hideDescription: true
+    hideDescription: true,
+    noAutoAdvance: true
   },
   {
     id: 'training_days',
@@ -107,7 +109,8 @@ const questions: Question[] = [
     questionHe: 'כמה ימים בשבוע אתה יכול להתאמן?',
     options: ['2', '3', '4', '5', '6+'],
     optionsHe: ['2', '3', '4', '5', '6+'],
-    hideDescription: true
+    hideDescription: true,
+    noAutoAdvance: true
   },
   {
     id: 'equipment',
@@ -165,14 +168,8 @@ const questions: Question[] = [
       'אני צריך יותר מידע קודם',
       'המחיר מחוץ לתקציב שלי'
     ],
-    hideDescription: true
-  },
-  {
-    id: 'consultation_booking',
-    type: 'calendar',
-    question: 'Great! Let\'s schedule your free consultation call:',
-    questionHe: 'מעולה! בואו נקבע שיחת ייעוץ ראשונית:',
-    hideDescription: true
+    hideDescription: true,
+    noAutoAdvance: true
   },
   {
     id: 'additional_info',
@@ -180,9 +177,7 @@ const questions: Question[] = [
     question: 'Anything else you want me to know?',
     questionHe: 'משהו נוסף שתרצה שאדע?',
     placeholder: 'Type your answer here...',
-    placeholderHe: 'הקלד את התשובה שלך כאן...',
-    description: 'Final step',
-    descriptionHe: 'סיום'
+    placeholderHe: 'הקלד את התשובה שלך כאן...'
   },
   {
     id: 'email',
@@ -191,6 +186,13 @@ const questions: Question[] = [
     questionHe: 'השאר את האימייל הטוב ביותר שלך:',
     placeholder: 'name@example.com',
     placeholderHe: 'שם@דוגמה.com',
+    hideDescription: true
+  },
+  {
+    id: 'consultation_booking',
+    type: 'calendar',
+    question: 'Great! Let\'s schedule your free consultation call:',
+    questionHe: 'מעולה! בואו נקבע שיחת ייעוץ ראשונית:',
     hideDescription: true
   }
 ];
@@ -214,31 +216,53 @@ export default function Home() {
     if (currentQuestion?.type === 'calendar') {
       (async function () {
         const cal = await getCalApi({"namespace":"arik-moz-1-1"});
-        cal("ui", {"hideEventTypeDetails":false,"layout":"month_view"});
+
+        // Configure UI with week view and theme
+        cal("ui", {
+          "theme": "light",
+          "cssVarsPerTheme": {
+            "light": {
+              "cal-brand": "#5084e1"
+            }
+          },
+          "hideEventTypeDetails": false,
+          "layout": "week_view"
+        });
 
         // Listen for booking success
         cal("on", {
           action: "bookingSuccessful",
-          callback: (e: any) => {
+          callback: async (e: any) => {
             console.log("Booking successful!", e.detail);
             setCalendarBooked(true);
+
             // Store booking info
-            setAnswers(prev => ({
-              ...prev,
+            const bookingData = {
+              ...answers,
               consultation_booking: `Booked: ${e.detail.data.date}`
-            }));
-            // Auto-advance after booking
+            };
+            setAnswers(bookingData);
+
+            // Submit to database
+            try {
+              await fetch('/api/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingData)
+              });
+            } catch (error) {
+              console.error('Error submitting booking:', error);
+            }
+
+            // Show success message and redirect to thank you page
             setTimeout(() => {
-              if (currentStep < questions.length - 1) {
-                setCurrentStep(currentStep + 1);
-                setCurrentAnswer('');
-              }
+              setIsComplete(true);
             }, 1500);
           }
         });
       })();
     }
-  }, [currentQuestion?.type, currentStep]);
+  }, [currentQuestion?.type, currentStep, answers]);
 
   const handleNext = async () => {
     // Check if answer is required (only question 12 is optional)
@@ -437,8 +461,8 @@ export default function Home() {
           </h1>
           <p className="text-lg">
             {lang === 'he'
-              ? 'הטופס נשלח בהצלחה. ניצור איתך קשר בקרוב.'
-              : "Form submitted successfully. We'll be in touch soon."}
+              ? 'הפגישה נקבעה בהצלחה! נתראה בקרוב.'
+              : "Consultation booked successfully! See you soon."}
           </p>
         </motion.div>
       </div>
@@ -549,19 +573,29 @@ export default function Home() {
                   })}
                 </div>
               ) : currentQuestion.type === 'calendar' ? (
-                <div className="w-full bg-white rounded-lg p-4 shadow-lg" style={{minHeight: '500px'}}>
-                  <Cal
-                    namespace="arik-moz-1-1"
-                    calLink="arik-moz/arik-moz-1-1"
-                    style={{width:"100%",height:"100%",overflow:"scroll"}}
-                    config={{"layout":"month_view"}}
-                  />
-                  {calendarBooked && (
-                    <div className="mt-4 p-3 bg-green-100 text-green-800 rounded text-center">
-                      {lang === 'he' ? '✓ התור נקבע בהצלחה!' : '✓ Appointment booked successfully!'}
-                    </div>
-                  )}
-                </div>
+                <>
+                  {console.log('Cal.com prefill data:', { name: answers.name, email: answers.email })}
+                  <div className="w-full bg-white rounded-lg p-4 shadow-lg" style={{minHeight: '500px'}}>
+                    <Cal
+                      namespace="arik-moz-1-1"
+                      calLink="arik-moz/arik-moz-1-1"
+                      style={{width:"100%",height:"100%",overflow:"scroll"}}
+                      config={{
+                        "layout": "week_view",
+                        "theme": "light",
+                        "prefill": {
+                          "name": answers.name || "",
+                          "email": answers.email || ""
+                        }
+                      }}
+                    />
+                    {calendarBooked && (
+                      <div className="mt-4 p-3 bg-green-100 text-green-800 rounded text-center">
+                        {lang === 'he' ? '✓ התור נקבע בהצלחה!' : '✓ Appointment booked successfully!'}
+                      </div>
+                    )}
+                  </div>
+                </>
               ) : currentQuestion.type === 'textarea' ? (
                 <>
                   <textarea
