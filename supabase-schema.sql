@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS leads (
   main_goal TEXT,
   training_experience TEXT,
   training_days TEXT,
+  daily_training_time TEXT,
+  diet TEXT,
   equipment TEXT,
 
   -- Health & History

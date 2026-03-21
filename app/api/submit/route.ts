@@ -22,6 +22,8 @@ export async function POST(req: Request) {
       main_goal: answers.main_goal,
       training_experience: answers.training_experience,
       training_days: answers.training_days,
+      daily_training_time: answers.daily_training_time,
+      diet: answers.diet,
       equipment: answers.equipment,
 
       // Health & History

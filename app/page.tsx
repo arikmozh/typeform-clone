@@ -21,6 +21,8 @@ type Question = {
   placeholderHe?: string;
   options?: string[];
   optionsHe?: string[];
+  optionsFemale?: string[];
+  optionsFemaleHe?: string[];
   hideDescription?: boolean;
   description?: string;
   descriptionHe?: string;
@@ -85,6 +87,21 @@ const questions: Question[] = [
       "להתחזק ולהיות אתלטי יותר (ריצות/היבריד)",
       "מנטלי",
     ],
+    // Female-specific options
+    optionsFemale: [
+      "Tone & strengthen glutes",
+      "Lose fat & get lean",
+      "Nutrition",
+      "Improve flexibility & balance",
+      "Mental",
+    ],
+    optionsFemaleHe: [
+      "חיטוב ומיצוק הישבן",
+      "שריפת שומן והרזיה",
+      "תזונה",
+      "שיפור גמישות ושיווי משקל",
+      "מנטלי",
+    ],
     hideDescription: true,
     multiChoiceNote: "Select all that apply",
     multiChoiceNoteHe: "ניתן לבחור יותר מאחד",
@@ -113,6 +130,24 @@ const questions: Question[] = [
     questionHe: "כמה ימים בשבוע אתה יכול להתאמן?",
     options: ["2", "3", "4", "5", "6+"],
     optionsHe: ["2", "3", "4", "5", "6+"],
+    hideDescription: true,
+  },
+  {
+    id: "daily_training_time",
+    type: "choice",
+    question: "How much time do you have for training/movement per day?",
+    questionHe: "כמה זמן יש לך לאימון/תנועה ביום?",
+    options: ["10 minutes", "30 minutes", "1 hour", "More than 1 hour"],
+    optionsHe: ["10 דקות", "30 דקות", "שעה", "יותר משעה"],
+    hideDescription: true,
+  },
+  {
+    id: "diet",
+    type: "choice",
+    question: "How is your diet?",
+    questionHe: "איך התזונה שלך?",
+    options: ["Vegetarian", "Vegan", "No restrictions"],
+    optionsHe: ["צמחוני", "טבעוני", "לא בעייתי"],
     hideDescription: true,
   },
   {
@@ -162,7 +197,7 @@ const questions: Question[] = [
     question:
       "My 1-on-1 coaching starts at $197/mo. Are you ready to invest in yourself?",
     questionHe:
-      "הליווי האישי שלי מתחיל ב-₪730 לחודש. האם אתה מוכן להשקיע בעצמך?",
+      "הליווי האישי שלי מתחיל מ-₪730 לחודש. האם אתה מוכן להשקיע בעצמך?",
     options: [
       "Yes, I'm ready to start",
       "I need more information first",
@@ -547,8 +582,16 @@ export default function Home() {
 
   const displayQuestion =
     lang === "he" ? currentQuestion.questionHe : currentQuestion.question;
-  const displayOptions =
-    lang === "he" ? currentQuestion.optionsHe : currentQuestion.options;
+
+  // Use female-specific options if gender is female and they exist
+  const isFemale = answers.gender === "Female" || answers.gender === "נקבה";
+  const displayOptions = (() => {
+    if (isFemale && currentQuestion.optionsFemale && currentQuestion.optionsFemaleHe) {
+      return lang === "he" ? currentQuestion.optionsFemaleHe : currentQuestion.optionsFemale;
+    }
+    return lang === "he" ? currentQuestion.optionsHe : currentQuestion.options;
+  })();
+
   const displayPlaceholder =
     lang === "he" ? currentQuestion.placeholderHe : currentQuestion.placeholder;
 
