@@ -347,13 +347,13 @@ export default function Home() {
           className="max-w-2xl text-center"
         >
           <h1 className="text-3xl text-[#2b2b2b] mb-8 font-bold">
-            {lang === 'he' ? 'ליווי 1:1 כושר/היברידי/מנטלי - טופס בקשה' : '1:1 coaching Fitness/Hybrid/Mental Training Application'}
+            {lang === 'he' ? 'ליווי 1:1 עם אריק' : '1:1 Coaching with Arik'}
           </h1>
 
           <p className="text-base text-[#868786] mb-12 leading-relaxed max-w-xl mx-auto">
             {lang === 'he'
-              ? 'הליווי 1:1 הזה מיועד לאנשים רציניים לגבי המטרות שלהם. שרוצים להשיג משהו שהם חלמו עליו ופשוט צריכים את ההדרכה. רוצה לעזור כמה שיותר!'
-              : 'This 1:1 coaching is for people that are serious about their goals. That want to accomplish something that they have dreamed of and just need the guidance. Want to be as much help as possible!'
+              ? 'הליווי 1:1 הזה מיועד לאנשים רציניים לגבי המטרות שלהם. הטופס הזה נועד לעזור לי ולך כמה שיותר.'
+              : 'This 1:1 coaching is for people who are serious about their goals. This form is designed to help me and you as much as possible.'
             }
           </p>
 
@@ -472,7 +472,7 @@ export default function Home() {
               {/* Question number and title */}
               <div className="mb-4">
                 <span className="text-base text-[#2b2b2b] font-bold">
-                  {currentStep + 1}. → {displayQuestion}
+                  {currentStep + 1}. {displayQuestion}
                 </span>
               </div>
 
