@@ -47,7 +47,6 @@ const questions: Question[] = [
     options: ["Under 18", "18-24", "25-34", "35-44", "45+"],
     optionsHe: ["מתחת ל-18", "18-24", "25-34", "35-44", "45+"],
     hideDescription: true,
-    noAutoAdvance: true,
   },
   {
     id: "gender",
@@ -57,7 +56,6 @@ const questions: Question[] = [
     options: ["Male", "Female"],
     optionsHe: ["זכר", "נקבה"],
     hideDescription: true,
-    noAutoAdvance: true,
   },
   {
     id: "phone",
@@ -107,7 +105,6 @@ const questions: Question[] = [
       "מתקדם (2+ שנים)",
     ],
     hideDescription: true,
-    noAutoAdvance: true,
   },
   {
     id: "training_days",
@@ -117,7 +114,6 @@ const questions: Question[] = [
     options: ["2", "3", "4", "5", "6+"],
     optionsHe: ["2", "3", "4", "5", "6+"],
     hideDescription: true,
-    noAutoAdvance: true,
   },
   {
     id: "equipment",
@@ -178,7 +174,6 @@ const questions: Question[] = [
       "המחיר מחוץ לתקציב שלי",
     ],
     hideDescription: true,
-    noAutoAdvance: true,
   },
   {
     id: "additional_info",
@@ -187,6 +182,7 @@ const questions: Question[] = [
     questionHe: "משהו נוסף שתרצה שאדע?",
     placeholder: "Type your answer here...",
     placeholderHe: "הקלד את התשובה שלך כאן...",
+    hideDescription: true,
   },
   {
     id: "email",
@@ -216,6 +212,13 @@ export default function Home() {
   const [isComplete, setIsComplete] = useState(false);
   const [lang, setLang] = useState<"en" | "he">("he");
   const [calendarBooked, setCalendarBooked] = useState(false);
+  const [validationError, setValidationError] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
@@ -262,11 +265,6 @@ export default function Home() {
             } catch (error) {
               console.error("Error submitting booking:", error);
             }
-
-            // Show success message and redirect to thank you page
-            setTimeout(() => {
-              setIsComplete(true);
-            }, 1500);
           },
         });
       })();
@@ -274,6 +272,9 @@ export default function Home() {
   }, [currentQuestion?.type, currentStep, answers]);
 
   const handleNext = async () => {
+    // Clear previous validation errors
+    setValidationError("");
+
     // Check if answer is required (only question 12 is optional)
     const isOptional = !currentQuestion.hideDescription;
 
@@ -286,6 +287,32 @@ export default function Home() {
       !isOptional
     ) {
       return;
+    }
+
+    // Validate phone number (step 4)
+    if (currentQuestion.type === "phone") {
+      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+      if (!phoneRegex.test(currentAnswer) || currentAnswer.length < 9) {
+        setValidationError(
+          lang === "he"
+            ? "אנא הזן מספר טלפון תקין"
+            : "Please enter a valid phone number",
+        );
+        return;
+      }
+    }
+
+    // Validate email (step 13)
+    if (currentQuestion.type === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(currentAnswer)) {
+        setValidationError(
+          lang === "he"
+            ? "אנא הזן כתובת אימייל תקינה"
+            : "Please enter a valid email address",
+        );
+        return;
+      }
     }
 
     // Store current answer before moving
@@ -344,15 +371,23 @@ export default function Home() {
     };
     setAnswers(newAnswers);
 
-    setTimeout(() => {
-      if (currentStep < questions.length - 1) {
-        setCurrentStep(currentStep + 1);
-        setCurrentAnswer(newAnswers[questions[currentStep + 1].id] || "");
-      } else {
-        // Last question - submit
-        handleNext();
-      }
-    }, 300);
+    // Check if this question was already answered (user came back)
+    const wasAlreadyAnswered =
+      answers[currentQuestion.id] !== undefined &&
+      answers[currentQuestion.id] !== "";
+
+    // Only auto-advance if this is the first time answering
+    if (!wasAlreadyAnswered) {
+      setTimeout(() => {
+        if (currentStep < questions.length - 1) {
+          setCurrentStep(currentStep + 1);
+          setCurrentAnswer(newAnswers[questions[currentStep + 1].id] || "");
+        } else {
+          // Last question - submit
+          handleNext();
+        }
+      }, 300);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -363,6 +398,7 @@ export default function Home() {
   };
 
   const handleBack = () => {
+    setValidationError("");
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
       const prevQuestion = questions[currentStep - 1];
@@ -392,7 +428,10 @@ export default function Home() {
   // Welcome Screen
   if (showWelcome) {
     return (
-      <div className="min-h-screen bg-[#f3f3f3] flex flex-col items-center justify-center p-4 font-mono">
+      <div
+        className="min-h-screen bg-[#f3f3f3] flex flex-col items-center justify-center p-4 font-mono"
+        dir={mounted ? (lang === "he" ? "rtl" : "ltr") : undefined}
+      >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -461,7 +500,10 @@ export default function Home() {
   // Success Screen
   if (isComplete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center p-4 font-mono">
+      <div
+        className="min-h-screen bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center p-4 font-mono"
+        dir={mounted ? (lang === "he" ? "rtl" : "ltr") : undefined}
+      >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -497,7 +539,10 @@ export default function Home() {
 
   // Question Screen
   return (
-    <div className="min-h-screen bg-[#f3f3f3] flex flex-col font-mono">
+    <div
+      className="min-h-screen bg-[#f3f3f3] flex flex-col font-mono"
+      dir={mounted ? (lang === "he" ? "rtl" : "ltr") : undefined}
+    >
       {/* Progress Bar */}
       <div className="w-full h-1 bg-gray-200">
         <motion.div
@@ -524,7 +569,7 @@ export default function Home() {
                 onClick={handleBack}
                 className="mb-6 text-[#868786] hover:text-[#2b2b2b] text-sm cursor-pointer transition-colors"
               >
-                {lang === "he" ? "← חזור אחורה" : "← Go back"}
+                {lang === "he" ? "→ חזור אחורה" : "← Go back"}
               </button>
 
               {/* Question number and title */}
@@ -555,27 +600,26 @@ export default function Home() {
                 )}
 
               {currentQuestion.type === "choice" ? (
-                <div className="space-y-3">
+                <div className="space-y-3" dir="ltr">
                   {displayOptions?.map((option, index) => {
                     const isSelected = currentAnswer === option;
+                    const wasAlreadyAnswered =
+                      answers[currentQuestion.id] !== undefined &&
+                      answers[currentQuestion.id] !== "";
                     return (
                       <button
                         key={index}
-                        onClick={() =>
-                          currentQuestion.noAutoAdvance
-                            ? setCurrentAnswer(option)
-                            : handleChoice(option)
-                        }
+                        onClick={() => handleChoice(option)}
                         className={`w-full text-left px-5 py-3 bg-white border rounded transition-all text-base group cursor-pointer ${
-                          isSelected && currentQuestion.noAutoAdvance
+                          isSelected && wasAlreadyAnswered
                             ? "border-[#5083e1] bg-[#5083e1]/10 text-[#2b2b2b]"
                             : "border-gray-300 hover:border-[#5083e1] hover:bg-[#5083e1]/5 text-[#2b2b2b]"
                         }`}
                       >
                         <span
-                          className={`mr-3 text-sm ${isSelected && currentQuestion.noAutoAdvance ? "text-[#5083e1]" : "text-[#868786] group-hover:text-[#5083e1]"}`}
+                          className={`mr-3 text-sm ${isSelected && wasAlreadyAnswered ? "text-[#5083e1]" : "text-[#868786] group-hover:text-[#5083e1]"}`}
                         >
-                          {isSelected && currentQuestion.noAutoAdvance
+                          {isSelected && wasAlreadyAnswered
                             ? "✓"
                             : String.fromCharCode(65 + index)}
                         </span>
@@ -585,7 +629,7 @@ export default function Home() {
                   })}
                 </div>
               ) : currentQuestion.type === "multi-choice" ? (
-                <div className="space-y-3">
+                <div className="space-y-3" dir="ltr">
                   {displayOptions?.map((option, index) => {
                     const isSelected = multiChoices.includes(option);
                     return (
@@ -613,6 +657,7 @@ export default function Home() {
                   {console.log("Cal.com prefill data:", {
                     name: answers.name,
                     email: answers.email,
+                    phone: answers.phone,
                   })}
                   <div
                     className="w-full bg-white rounded-lg p-4 shadow-lg"
@@ -629,17 +674,30 @@ export default function Home() {
                       config={{
                         layout: "week_view",
                         theme: "light",
-                        prefill: {
-                          name: answers.name || "",
-                          email: answers.email || "",
-                        },
+                        name: answers.name || "",
+                        email: answers.email || "",
+                        phone: answers.phone || "",
+                        guests: [answers.email || ""],
                       }}
                     />
                     {calendarBooked && (
-                      <div className="mt-4 p-3 bg-green-100 text-green-800 rounded text-center">
-                        {lang === "he"
-                          ? "✓ התור נקבע בהצלחה!"
-                          : "✓ Appointment booked successfully!"}
+                      <div className="mt-4 p-4 text-black rounded text-center">
+                        <div className="text-xl font-bold mb-2">
+                          {lang === "he" ? "תודה רבה!" : "Thank you!"}
+                        </div>
+                        <div className="text-base mb-4">
+                          {lang === "he"
+                            ? "הפגישה נקבעה בהצלחה, נתראה בקרוב"
+                            : "Appointment booked successfully, see you soon"}
+                        </div>
+                        <button
+                          onClick={() => window.location.reload()}
+                          className="px-6 py-3 bg-[#5083e1] text-black rounded font-bold text-base hover:bg-[#4a75d1] transition-colors cursor-pointer "
+                        >
+                          {lang === "he"
+                            ? "חזרה למסך הבית"
+                            : "Back to home screen"}
+                        </button>
                       </div>
                     )}
                   </div>
@@ -648,7 +706,10 @@ export default function Home() {
                 <>
                   <textarea
                     value={currentAnswer}
-                    onChange={(e) => setCurrentAnswer(e.target.value)}
+                    onChange={(e) => {
+                      setCurrentAnswer(e.target.value);
+                      setValidationError("");
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
@@ -662,15 +723,29 @@ export default function Home() {
                   />
                 </>
               ) : (
-                <input
-                  type={currentQuestion.type}
-                  value={currentAnswer}
-                  onChange={(e) => setCurrentAnswer(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder={displayPlaceholder}
-                  className="w-full bg-transparent border-b border-gray-300 py-2 text-[#2b2b2b] text-lg placeholder-gray-300 focus:outline-none focus:border-[#5083e1] transition-colors"
-                  autoFocus
-                />
+                <>
+                  <input
+                    type={currentQuestion.type}
+                    value={currentAnswer}
+                    onChange={(e) => {
+                      setCurrentAnswer(e.target.value);
+                      setValidationError("");
+                    }}
+                    onKeyPress={handleKeyPress}
+                    placeholder={displayPlaceholder}
+                    className={`w-full bg-transparent border-b py-2 text-[#2b2b2b] text-lg placeholder-gray-300 focus:outline-none transition-colors ${
+                      validationError
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:border-[#5083e1]"
+                    }`}
+                    autoFocus
+                  />
+                  {validationError && (
+                    <div className="mt-2 text-sm text-red-500">
+                      {validationError}
+                    </div>
+                  )}
+                </>
               )}
 
               {currentQuestion.type !== "choice" &&
@@ -691,52 +766,58 @@ export default function Home() {
                 )}
 
               {currentQuestion.type === "textarea" && (
-                  <div className="mt-4 text-xs text-[#868786]">
-                    {lang === "he"
-                      ? "Shift + Enter ליצירת שורה חדשה"
-                      : "Shift + Enter to make a line break"}
-                  </div>
-                )}
+                <div className="mt-4 text-xs text-[#868786]">
+                  {lang === "he"
+                    ? "Shift + Enter ליצירת שורה חדשה"
+                    : "Shift + Enter to make a line break"}
+                </div>
+              )}
 
-              {/* Next Button - Hide for calendar and auto-advance choice questions */}
-              {currentQuestion.type !== "calendar" &&
-                !(
-                  currentQuestion.type === "choice" &&
-                  !currentQuestion.noAutoAdvance
-                ) && (
-                  <div className="mt-8">
-                    <button
-                      onClick={handleNext}
-                      disabled={
-                        isSubmitting ||
-                        (currentQuestion.type === "multi-choice" &&
-                          multiChoices.length === 0 &&
-                          currentQuestion.hideDescription !== false) ||
-                        (currentQuestion.type === "choice" &&
-                          currentQuestion.noAutoAdvance &&
-                          !currentAnswer.trim() &&
-                          currentQuestion.hideDescription !== false) ||
-                        (currentQuestion.type !== "choice" &&
-                          currentQuestion.type !== "multi-choice" &&
-                          !currentAnswer.trim() &&
-                          currentQuestion.hideDescription !== false)
-                      }
-                      className="px-6 py-3 bg-[#5083e1] text-black rounded font-bold text-base hover:bg-[#4a75d1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                    >
-                      {isSubmitting
-                        ? lang === "he"
-                          ? "שולח..."
-                          : "Submitting..."
-                        : currentStep < questions.length - 1
+              {/* Next Button - Hide for calendar and choice questions on first answer */}
+              {(() => {
+                const wasAlreadyAnswered =
+                  answers[currentQuestion.id] !== undefined &&
+                  answers[currentQuestion.id] !== "";
+                const shouldShowNextButton =
+                  currentQuestion.type !== "calendar" &&
+                  !(currentQuestion.type === "choice" && !wasAlreadyAnswered);
+
+                return (
+                  shouldShowNextButton && (
+                    <div className="mt-8">
+                      <button
+                        onClick={handleNext}
+                        disabled={
+                          isSubmitting ||
+                          (currentQuestion.type === "multi-choice" &&
+                            multiChoices.length === 0 &&
+                            currentQuestion.hideDescription !== false) ||
+                          (currentQuestion.type === "choice" &&
+                            !currentAnswer.trim() &&
+                            currentQuestion.hideDescription !== false) ||
+                          (currentQuestion.type !== "choice" &&
+                            currentQuestion.type !== "multi-choice" &&
+                            !currentAnswer.trim() &&
+                            currentQuestion.hideDescription !== false)
+                        }
+                        className="px-6 py-3 bg-[#5083e1] text-black rounded font-bold text-base hover:bg-[#4a75d1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        {isSubmitting
                           ? lang === "he"
-                            ? "הבא →"
-                            : "Next →"
-                          : lang === "he"
-                            ? "שלח"
-                            : "Submit"}
-                    </button>
-                  </div>
-                )}
+                            ? "שולח..."
+                            : "Submitting..."
+                          : currentStep < questions.length - 1
+                            ? lang === "he"
+                              ? "← הבא"
+                              : "Next →"
+                            : lang === "he"
+                              ? "שלח"
+                              : "Submit"}
+                      </button>
+                    </div>
+                  )
+                );
+              })()}
             </motion.div>
           </AnimatePresence>
         </div>
