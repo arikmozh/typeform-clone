@@ -17,12 +17,18 @@ type Question = {
     | "calendar";
   question: string;
   questionHe: string;
+  questionHeMale?: string;
+  questionHeFemale?: string;
   placeholder?: string;
   placeholderHe?: string;
+  placeholderHeMale?: string;
+  placeholderHeFemale?: string;
   options?: string[];
   optionsHe?: string[];
   optionsFemale?: string[];
   optionsFemaleHe?: string[];
+  optionsHeMale?: string[];
+  optionsHeFemale?: string[];
   hideDescription?: boolean;
   description?: string;
   descriptionHe?: string;
@@ -64,6 +70,8 @@ const questions: Question[] = [
     type: "phone",
     question: "What's your phone number?",
     questionHe: "מה מספר הפלאפון שלך?",
+    questionHeMale: "מה מספר הפלאפון שלך?",
+    questionHeFemale: "מה מספר הפלאפון שלך?",
     placeholder: "(201) 555-0123",
     placeholderHe: "050-123-4567",
     hideDescription: true,
@@ -111,6 +119,8 @@ const questions: Question[] = [
     type: "choice",
     question: "What's your current training experience?",
     questionHe: "מה ניסיון האימון הנוכחי שלך?",
+    questionHeMale: "מה ניסיון האימון הנוכחי שלך?",
+    questionHeFemale: "מה ניסיון האימון הנוכחי שלך?",
     options: [
       "Complete beginner (0-6 months)",
       "Intermediate (6 months-2 years)",
@@ -121,6 +131,16 @@ const questions: Question[] = [
       "בינוני (6 חודשים-2 שנים)",
       "מתקדם (2+ שנים)",
     ],
+    optionsHeMale: [
+      "מתחיל לחלוטין (0-6 חודשים)",
+      "בינוני (6 חודשים-2 שנים)",
+      "מתקדם (2+ שנים)",
+    ],
+    optionsHeFemale: [
+      "מתחילה לחלוטין (0-6 חודשים)",
+      "בינונית (6 חודשים-2 שנים)",
+      "מתקדמת (2+ שנים)",
+    ],
     hideDescription: true,
   },
   {
@@ -128,6 +148,8 @@ const questions: Question[] = [
     type: "choice",
     question: "How many days per week can you train?",
     questionHe: "כמה ימים בשבוע אתה יכול להתאמן?",
+    questionHeMale: "כמה ימים בשבוע אתה יכול להתאמן?",
+    questionHeFemale: "כמה ימים בשבוע את יכולה להתאמן?",
     options: ["2", "3", "4", "5", "6+"],
     optionsHe: ["2", "3", "4", "5", "6+"],
     hideDescription: true,
@@ -137,6 +159,8 @@ const questions: Question[] = [
     type: "choice",
     question: "How much time do you have for training/movement per day?",
     questionHe: "כמה זמן יש לך לאימון/תנועה ביום?",
+    questionHeMale: "כמה זמן יש לך לאימון/תנועה ביום?",
+    questionHeFemale: "כמה זמן יש לך לאימון/תנועה ביום?",
     options: ["10 minutes", "30 minutes", "1 hour", "More than 1 hour"],
     optionsHe: ["10 דקות", "30 דקות", "שעה", "יותר משעה"],
     hideDescription: true,
@@ -146,8 +170,12 @@ const questions: Question[] = [
     type: "choice",
     question: "How is your diet?",
     questionHe: "איך התזונה שלך?",
+    questionHeMale: "איך התזונה שלך?",
+    questionHeFemale: "איך התזונה שלך?",
     options: ["Vegetarian", "Vegan", "No restrictions"],
     optionsHe: ["צמחוני", "טבעוני", "לא בעייתי"],
+    optionsHeMale: ["צמחוני", "טבעוני", "לא בעייתי"],
+    optionsHeFemale: ["צמחונית", "טבעונית", "לא בעייתי"],
     hideDescription: true,
   },
   {
@@ -178,8 +206,12 @@ const questions: Question[] = [
     type: "textarea",
     question: "Do you have any injuries or physical limitations?",
     questionHe: "האם יש לך פציעות או מגבלות פיזיות?",
+    questionHeMale: "האם יש לך פציעות או מגבלות פיזיות?",
+    questionHeFemale: "האם יש לך פציעות או מגבלות פיזיות?",
     placeholder: "Type your answer here...",
     placeholderHe: "הקלד את התשובה שלך כאן...",
+    placeholderHeMale: "הקלד את התשובה שלך כאן...",
+    placeholderHeFemale: "הקלידי את התשובה שלך כאן...",
     hideDescription: true,
   },
   {
@@ -187,8 +219,12 @@ const questions: Question[] = [
     type: "textarea",
     question: "What have you tried before that didn't work?",
     questionHe: "מה ניסית בעבר שלא עבד?",
+    questionHeMale: "מה ניסית בעבר שלא עבד?",
+    questionHeFemale: "מה ניסית בעבר שלא עבד?",
     placeholder: "Type your answer here...",
     placeholderHe: "הקלד את התשובה שלך כאן...",
+    placeholderHeMale: "הקלד את התשובה שלך כאן...",
+    placeholderHeFemale: "הקלידי את התשובה שלך כאן...",
     hideDescription: true,
   },
   {
@@ -198,6 +234,10 @@ const questions: Question[] = [
       "My 1-on-1 coaching starts at $197/mo. Are you ready to invest in yourself?",
     questionHe:
       "הליווי האישי שלי מתחיל מ-₪730 לחודש. האם אתה מוכן להשקיע בעצמך?",
+    questionHeMale:
+      "הליווי האישי שלי מתחיל מ-₪730 לחודש. האם אתה מוכן להשקיע בעצמך?",
+    questionHeFemale:
+      "הליווי האישי שלי מתחיל מ-₪730 לחודש. האם את מוכנה להשקיע בעצמך?",
     options: [
       "Yes, I'm ready to start",
       "I need more information first",
@@ -208,6 +248,16 @@ const questions: Question[] = [
       "אני צריך יותר מידע קודם",
       "המחיר מחוץ לתקציב שלי",
     ],
+    optionsHeMale: [
+      "כן, אני מוכן להתחיל",
+      "אני צריך יותר מידע קודם",
+      "המחיר מחוץ לתקציב שלי",
+    ],
+    optionsHeFemale: [
+      "כן, אני מוכנה להתחיל",
+      "אני צריכה יותר מידע קודם",
+      "המחיר מחוץ לתקציב שלי",
+    ],
     hideDescription: true,
   },
   {
@@ -215,8 +265,12 @@ const questions: Question[] = [
     type: "textarea",
     question: "Anything else you want me to know?",
     questionHe: "משהו נוסף שתרצה שאדע?",
+    questionHeMale: "משהו נוסף שתרצה שאדע?",
+    questionHeFemale: "משהו נוסף שתרצי שאדע?",
     placeholder: "Type your answer here...",
     placeholderHe: "הקלד את התשובה שלך כאן...",
+    placeholderHeMale: "הקלד את התשובה שלך כאן...",
+    placeholderHeFemale: "הקלידי את התשובה שלך כאן...",
     hideDescription: true,
   },
   {
@@ -580,20 +634,51 @@ export default function Home() {
     );
   }
 
-  const displayQuestion =
-    lang === "he" ? currentQuestion.questionHe : currentQuestion.question;
-
-  // Use female-specific options if gender is female and they exist
+  // Determine gender for language customization
   const isFemale = answers.gender === "Female" || answers.gender === "נקבה";
-  const displayOptions = (() => {
-    if (isFemale && currentQuestion.optionsFemale && currentQuestion.optionsFemaleHe) {
-      return lang === "he" ? currentQuestion.optionsFemaleHe : currentQuestion.optionsFemale;
+
+  // Display question based on gender and language
+  const displayQuestion = (() => {
+    if (lang === "he") {
+      if (isFemale && currentQuestion.questionHeFemale) {
+        return currentQuestion.questionHeFemale;
+      } else if (!isFemale && currentQuestion.questionHeMale) {
+        return currentQuestion.questionHeMale;
+      }
+      return currentQuestion.questionHe;
     }
-    return lang === "he" ? currentQuestion.optionsHe : currentQuestion.options;
+    return currentQuestion.question;
   })();
 
-  const displayPlaceholder =
-    lang === "he" ? currentQuestion.placeholderHe : currentQuestion.placeholder;
+  // Use gender-specific options if they exist
+  const displayOptions = (() => {
+    if (lang === "he") {
+      if (isFemale && currentQuestion.optionsHeFemale) {
+        return currentQuestion.optionsHeFemale;
+      } else if (!isFemale && currentQuestion.optionsHeMale) {
+        return currentQuestion.optionsHeMale;
+      }
+      return currentQuestion.optionsHe;
+    }
+    // For English, only female-specific options exist for main_goal
+    if (isFemale && currentQuestion.optionsFemale) {
+      return currentQuestion.optionsFemale;
+    }
+    return currentQuestion.options;
+  })();
+
+  // Display placeholder based on gender and language
+  const displayPlaceholder = (() => {
+    if (lang === "he") {
+      if (isFemale && currentQuestion.placeholderHeFemale) {
+        return currentQuestion.placeholderHeFemale;
+      } else if (!isFemale && currentQuestion.placeholderHeMale) {
+        return currentQuestion.placeholderHeMale;
+      }
+      return currentQuestion.placeholderHe;
+    }
+    return currentQuestion.placeholder;
+  })();
 
   // Question Screen
   return (
