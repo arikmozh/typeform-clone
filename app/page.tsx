@@ -236,6 +236,9 @@ export default function Home() {
             light: {
               "cal-brand": "#5084e1",
             },
+            dark: {
+              "cal-brand": "#5084e1",
+            },
           },
           hideEventTypeDetails: false,
           layout: "week_view",
