@@ -276,7 +276,7 @@ const questions: Question[] = [
   {
     id: "email",
     type: "email",
-    question: "Drop your best email to stay in the loop:",
+    question: "Leave your best email:",
     questionHe: "השאר את האימייל הטוב ביותר שלך:",
     placeholder: "name@example.com",
     placeholderHe: "שם@דוגמה.com",
@@ -285,7 +285,7 @@ const questions: Question[] = [
   {
     id: "consultation_booking",
     type: "calendar",
-    question: "Great! Let's schedule your free consultation call:",
+    question: "Great! Let's schedule an initial consultation call:",
     questionHe: "מעולה! בואו נקבע שיחת ייעוץ ראשונית:",
     hideDescription: true,
   },
