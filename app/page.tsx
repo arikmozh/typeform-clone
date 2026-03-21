@@ -437,6 +437,18 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-2xl text-center"
         >
+          {/* Profile Picture */}
+          <div className="mb-8 flex justify-center">
+            <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-[#5083e1] ring-offset-4">
+              <img
+                src="/propic.jpg"
+                alt="Arik"
+                className="w-full h-full object-cover object-center"
+                style={{ objectPosition: "center -48px" }}
+              />
+            </div>
+          </div>
+
           <h1 className="text-3xl text-[#2b2b2b] mb-8 font-bold">
             {lang === "he" ? "ליווי 1:1 עם אריק" : "1:1 Coaching with Arik"}
           </h1>
