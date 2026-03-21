@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Check, Clock } from 'lucide-react';
+import Cal, { getCalApi } from "@calcom/embed-react";
 
 type Question = {
   id: string;
-  type: 'text' | 'email' | 'phone' | 'textarea' | 'choice' | 'multi-choice';
+  type: 'text' | 'email' | 'phone' | 'textarea' | 'choice' | 'multi-choice' | 'calendar';
   question: string;
   questionHe: string;
   placeholder?: string;
@@ -143,7 +144,7 @@ const questions: Question[] = [
     id: 'investment',
     type: 'choice',
     question: 'My 1-on-1 coaching starts at $197/mo. Are you ready to invest in yourself?',
-    questionHe: 'האימון האישי שלי מתחיל ב-$197 לחודש. האם אתה מוכן להשקיע בעצמך?',
+    questionHe: 'הליווי האישי שלי מתחיל ב-₪730 לחודש. האם אתה מוכן להשקיע בעצמך?',
     options: [
       "Yes, I'm ready to start",
       'I need more information first',
@@ -154,6 +155,13 @@ const questions: Question[] = [
       'אני צריך יותר מידע קודם',
       'המחיר מחוץ לתקציב שלי'
     ],
+    hideDescription: true
+  },
+  {
+    id: 'consultation_booking',
+    type: 'calendar',
+    question: 'Great! Let\'s schedule your free consultation call:',
+    questionHe: 'מעולה! בואו נקבע שיחת ייעוץ ראשונית:',
     hideDescription: true
   },
   {
@@ -184,9 +192,41 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [lang, setLang] = useState<'en' | 'he'>('he');
+  const [calendarBooked, setCalendarBooked] = useState(false);
 
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
+
+  // Initialize Cal.com and listen for booking events
+  useEffect(() => {
+    if (currentQuestion?.type === 'calendar') {
+      (async function () {
+        const cal = await getCalApi({"namespace":"arik-moz-1-1"});
+        cal("ui", {"hideEventTypeDetails":false,"layout":"month_view"});
+
+        // Listen for booking success
+        cal("on", {
+          action: "bookingSuccessful",
+          callback: (e: any) => {
+            console.log("Booking successful!", e.detail);
+            setCalendarBooked(true);
+            // Store booking info
+            setAnswers(prev => ({
+              ...prev,
+              consultation_booking: `Booked: ${e.detail.data.date}`
+            }));
+            // Auto-advance after booking
+            setTimeout(() => {
+              if (currentStep < questions.length - 1) {
+                setCurrentStep(currentStep + 1);
+                setCurrentAnswer('');
+              }
+            }, 1500);
+          }
+        });
+      })();
+    }
+  }, [currentQuestion?.type, currentStep]);
 
   const handleNext = async () => {
     // Check if answer is required (only question 12 is optional)
@@ -480,6 +520,20 @@ export default function Home() {
                     );
                   })}
                 </div>
+              ) : currentQuestion.type === 'calendar' ? (
+                <div className="w-full bg-white rounded-lg p-4 shadow-lg" style={{minHeight: '500px'}}>
+                  <Cal
+                    namespace="arik-moz-1-1"
+                    calLink="arik-moz/arik-moz-1-1"
+                    style={{width:"100%",height:"100%",overflow:"scroll"}}
+                    config={{"layout":"month_view"}}
+                  />
+                  {calendarBooked && (
+                    <div className="mt-4 p-3 bg-green-100 text-green-800 rounded text-center">
+                      {lang === 'he' ? '✓ התור נקבע בהצלחה!' : '✓ Appointment booked successfully!'}
+                    </div>
+                  )}
+                </div>
               ) : currentQuestion.type === 'textarea' ? (
                 <>
                   <textarea
@@ -509,7 +563,7 @@ export default function Home() {
                 />
               )}
 
-              {currentQuestion.type !== 'choice' && currentQuestion.type !== 'multi-choice' && !isSubmitting && (
+              {currentQuestion.type !== 'choice' && currentQuestion.type !== 'multi-choice' && currentQuestion.type !== 'calendar' && !isSubmitting && (
                 <div className="mt-8 text-sm text-[#2b2b2b] hidden md:block">
                   {lang === 'he' ? (
                     <>לחץ <strong>Enter ↵</strong></>
@@ -525,26 +579,28 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Next Button */}
-              <div className="mt-8">
-                <button
-                  onClick={handleNext}
-                  disabled={
-                    isSubmitting ||
-                    (currentQuestion.type === 'multi-choice' && multiChoices.length === 0 && currentQuestion.hideDescription !== false) ||
-                    (currentQuestion.type !== 'choice' && currentQuestion.type !== 'multi-choice' && !currentAnswer.trim() && currentQuestion.hideDescription !== false)
-                  }
-                  className="px-6 py-3 bg-[#5083e1] text-black rounded font-bold text-base hover:bg-[#4a75d1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  {isSubmitting ? (
-                    lang === 'he' ? 'שולח...' : 'Submitting...'
-                  ) : currentStep < questions.length - 1 ? (
-                    lang === 'he' ? 'הבא →' : 'Next →'
-                  ) : (
-                    lang === 'he' ? 'שלח' : 'Submit'
-                  )}
-                </button>
-              </div>
+              {/* Next Button - Hide for calendar type since it auto-advances */}
+              {currentQuestion.type !== 'calendar' && (
+                <div className="mt-8">
+                  <button
+                    onClick={handleNext}
+                    disabled={
+                      isSubmitting ||
+                      (currentQuestion.type === 'multi-choice' && multiChoices.length === 0 && currentQuestion.hideDescription !== false) ||
+                      (currentQuestion.type !== 'choice' && currentQuestion.type !== 'multi-choice' && !currentAnswer.trim() && currentQuestion.hideDescription !== false)
+                    }
+                    className="px-6 py-3 bg-[#5083e1] text-black rounded font-bold text-base hover:bg-[#4a75d1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    {isSubmitting ? (
+                      lang === 'he' ? 'שולח...' : 'Submitting...'
+                    ) : currentStep < questions.length - 1 ? (
+                      lang === 'he' ? 'הבא →' : 'Next →'
+                    ) : (
+                      lang === 'he' ? 'שלח' : 'Submit'
+                    )}
+                  </button>
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
