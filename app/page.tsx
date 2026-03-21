@@ -15,6 +15,8 @@ type Question = {
   options?: string[];
   optionsHe?: string[];
   hideDescription?: boolean;
+  description?: string;
+  descriptionHe?: string;
   noAutoAdvance?: boolean;
   multiChoiceNote?: string;
   multiChoiceNoteHe?: string;
@@ -178,7 +180,9 @@ const questions: Question[] = [
     question: 'Anything else you want me to know?',
     questionHe: 'משהו נוסף שתרצה שאדע?',
     placeholder: 'Type your answer here...',
-    placeholderHe: 'הקלד את התשובה שלך כאן...'
+    placeholderHe: 'הקלד את התשובה שלך כאן...',
+    description: 'Final step',
+    descriptionHe: 'סיום'
   },
   {
     id: 'email',
@@ -487,7 +491,9 @@ export default function Home() {
               {/* Description (optional) */}
               {!currentQuestion.hideDescription && (
                 <p className="text-sm text-[#868786] italic mb-8">
-                  {lang === 'he' ? 'תיאור (אופציונלי)' : 'Description (optional)'}
+                  {lang === 'he'
+                    ? currentQuestion.descriptionHe || 'תיאור (אופציונלי)'
+                    : currentQuestion.description || 'Description (optional)'}
                 </p>
               )}
 
