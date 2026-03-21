@@ -15,6 +15,9 @@ type Question = {
   options?: string[];
   optionsHe?: string[];
   hideDescription?: boolean;
+  noAutoAdvance?: boolean;
+  multiChoiceNote?: string;
+  multiChoiceNoteHe?: string;
 };
 
 const questions: Question[] = [
@@ -43,7 +46,8 @@ const questions: Question[] = [
     questionHe: 'מגדר',
     options: ['Male', 'Female'],
     optionsHe: ['זכר', 'נקבה'],
-    hideDescription: true
+    hideDescription: true,
+    noAutoAdvance: true
   },
   {
     id: 'phone',
@@ -73,7 +77,9 @@ const questions: Question[] = [
       'להתחזק ולהיות אתלטי יותר (ריצות/היבריד)',
       'מנטלי'
     ],
-    hideDescription: true
+    hideDescription: true,
+    multiChoiceNote: 'Select all that apply',
+    multiChoiceNoteHe: 'ניתן לבחור יותר מאחד'
   },
   {
     id: 'training_experience',
@@ -120,7 +126,9 @@ const questions: Question[] = [
       'חבל קפיצה',
       'רצועות התנגדות'
     ],
-    hideDescription: true
+    hideDescription: true,
+    multiChoiceNote: 'Select all that apply',
+    multiChoiceNoteHe: 'ניתן לבחור יותר מאחד'
   },
   {
     id: 'injuries',
@@ -483,20 +491,34 @@ export default function Home() {
                 </p>
               )}
 
+              {/* Multi-choice note */}
+              {currentQuestion.type === 'multi-choice' && (currentQuestion.multiChoiceNote || currentQuestion.multiChoiceNoteHe) && (
+                <p className="text-sm text-[#868786] italic mb-4">
+                  {lang === 'he' ? currentQuestion.multiChoiceNoteHe : currentQuestion.multiChoiceNote}
+                </p>
+              )}
+
               {currentQuestion.type === 'choice' ? (
                 <div className="space-y-3">
-                  {displayOptions?.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleChoice(option)}
-                      className="w-full text-left px-5 py-3 bg-white border border-gray-300 rounded hover:border-[#5083e1] hover:bg-[#5083e1]/5 transition-all text-base group cursor-pointer text-[#2b2b2b]"
-                    >
-                      <span className="text-[#868786] mr-3 group-hover:text-[#5083e1] text-sm">
-                        {String.fromCharCode(65 + index)}
-                      </span>
-                      {option}
-                    </button>
-                  ))}
+                  {displayOptions?.map((option, index) => {
+                    const isSelected = currentAnswer === option;
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => currentQuestion.noAutoAdvance ? setCurrentAnswer(option) : handleChoice(option)}
+                        className={`w-full text-left px-5 py-3 bg-white border rounded transition-all text-base group cursor-pointer ${
+                          isSelected && currentQuestion.noAutoAdvance
+                            ? 'border-[#5083e1] bg-[#5083e1]/10 text-[#2b2b2b]'
+                            : 'border-gray-300 hover:border-[#5083e1] hover:bg-[#5083e1]/5 text-[#2b2b2b]'
+                        }`}
+                      >
+                        <span className={`mr-3 text-sm ${isSelected && currentQuestion.noAutoAdvance ? 'text-[#5083e1]' : 'text-[#868786] group-hover:text-[#5083e1]'}`}>
+                          {isSelected && currentQuestion.noAutoAdvance ? '✓' : String.fromCharCode(65 + index)}
+                        </span>
+                        {option}
+                      </button>
+                    );
+                  })}
                 </div>
               ) : currentQuestion.type === 'multi-choice' ? (
                 <div className="space-y-3">
@@ -579,14 +601,15 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Next Button - Hide for calendar type since it auto-advances */}
-              {currentQuestion.type !== 'calendar' && (
+              {/* Next Button - Hide for calendar and auto-advance choice questions */}
+              {currentQuestion.type !== 'calendar' && !(currentQuestion.type === 'choice' && !currentQuestion.noAutoAdvance) && (
                 <div className="mt-8">
                   <button
                     onClick={handleNext}
                     disabled={
                       isSubmitting ||
                       (currentQuestion.type === 'multi-choice' && multiChoices.length === 0 && currentQuestion.hideDescription !== false) ||
+                      (currentQuestion.type === 'choice' && currentQuestion.noAutoAdvance && !currentAnswer.trim() && currentQuestion.hideDescription !== false) ||
                       (currentQuestion.type !== 'choice' && currentQuestion.type !== 'multi-choice' && !currentAnswer.trim() && currentQuestion.hideDescription !== false)
                     }
                     className="px-6 py-3 bg-[#5083e1] text-black rounded font-bold text-base hover:bg-[#4a75d1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
