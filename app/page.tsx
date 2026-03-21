@@ -548,7 +548,7 @@ export default function Home() {
           <p className="text-base text-[#868786] mb-12 leading-relaxed max-w-xl mx-auto">
             {lang === "he"
               ? "הליווי הזה מיועד לאנשים רציניים לגבי המטרות שלהם. הטופס הזה נועד לעזור לי ולך כמה שיותר."
-              : "This 1:1 coaching is for people who are serious about their goals. This form is designed to help me and you as much as possible."}
+              : "This coaching is for people who are serious about their goals. This form is designed to help me and you as much as possible."}
           </p>
 
           <div className="flex flex-col gap-4 items-center justify-center mb-8">
