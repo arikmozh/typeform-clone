@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Check, Clock } from "lucide-react";
+import { ArrowRight, Check, Clock, Sun, Moon } from "lucide-react";
 import Cal, { getCalApi } from "@calcom/embed-react";
 
 type Question = {
@@ -77,6 +77,29 @@ const questions: Question[] = [
     hideDescription: true,
   },
   {
+    id: "why_now",
+    type: "multi-choice",
+    question: "What made you reach out now?",
+    questionHe: "מה גרם לך לפנות עכשיו?",
+    options: [
+      "Something changed in my life",
+      "I'm tired of my current situation",
+      "I want to improve my performance",
+      "Health / doctor's recommendation",
+      "Wedding / upcoming event",
+    ],
+    optionsHe: [
+      "משהו השתנה בחיים שלי",
+      "נמאס לי מהמצב",
+      "רוצה לשפר ביצועים",
+      "בריאות / המלצת רופא",
+      "חתונה / אירוע קרוב",
+    ],
+    hideDescription: true,
+    multiChoiceNote: "Select all that apply",
+    multiChoiceNoteHe: "ניתן לבחור יותר מאחד",
+  },
+  {
     id: "main_goal",
     type: "multi-choice",
     question: "What's your main goal?",
@@ -113,6 +136,27 @@ const questions: Question[] = [
     hideDescription: true,
     multiChoiceNote: "Select all that apply",
     multiChoiceNoteHe: "ניתן לבחור יותר מאחד",
+  },
+  {
+    id: "main_blocker",
+    type: "choice",
+    question: "What's the biggest thing holding you back?",
+    questionHe: "מה הדבר הכי גדול שמעכב אותך?",
+    options: [
+      "No time",
+      "Lack of motivation",
+      "Don't know where to start",
+      "Inconsistent nutrition",
+      "Keep falling off track",
+    ],
+    optionsHe: [
+      "אין לי זמן",
+      "חוסר מוטיבציה",
+      "לא יודע מאיפה להתחיל",
+      "תזונה לא מסודרת",
+      "נפילות חוזרות",
+    ],
+    hideDescription: true,
   },
   {
     id: "training_experience",
@@ -228,6 +272,35 @@ const questions: Question[] = [
     hideDescription: true,
   },
   {
+    id: "format_preference",
+    type: "choice",
+    question: "What works best for you?",
+    questionHe: "מה מתאים לך יותר?",
+    questionHeMale: "מה מתאים לך יותר?",
+    questionHeFemale: "מה מתאים לך יותר?",
+    options: [
+      "Personal 1:1 coaching with Arik",
+      "Workout program / meal plan from my experience — things that actually worked on me and others over the years",
+      "Not sure yet",
+    ],
+    optionsHe: [
+      "ליווי אישי 1:1 עם אריק",
+      "תוכנית אימונים / תפריט תזונה מהניסיון שלי — דברים שאשכרה עבדו עלי ועל אחרים לאורך השנים",
+      "עדיין לא יודע",
+    ],
+    optionsHeMale: [
+      "ליווי אישי 1:1 עם אריק",
+      "תוכנית אימונים / תפריט תזונה מהניסיון שלי — דברים שאשכרה עבדו עלי ועל אחרים לאורך השנים",
+      "עדיין לא יודע",
+    ],
+    optionsHeFemale: [
+      "ליווי אישי 1:1 עם אריק",
+      "תוכנית אימונים / תפריט תזונה מהניסיון שלי — דברים שאשכרה עבדו עלי ועל אחרים לאורך השנים",
+      "עדיין לא יודעת",
+    ],
+    hideDescription: true,
+  },
+  {
     id: "investment",
     type: "choice",
     question:
@@ -303,11 +376,18 @@ export default function Home() {
   const [calendarBooked, setCalendarBooked] = useState(false);
   const [validationError, setValidationError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
-  // Prevent hydration mismatch
+  // Detect system theme + prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setTheme(prefersDark ? "dark" : "light");
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
@@ -323,10 +403,10 @@ export default function Home() {
           theme: "light",
           cssVarsPerTheme: {
             light: {
-              "cal-brand": "#5084e1",
+              "cal-brand": "#E05A00",
             },
             dark: {
-              "cal-brand": "#5084e1",
+              "cal-brand": "#E05A00",
             },
           },
           hideEventTypeDetails: false,
@@ -521,36 +601,67 @@ export default function Home() {
   if (showWelcome) {
     return (
       <div
-        className="min-h-screen bg-[#f3f3f3] flex flex-col items-center justify-center p-4 font-mono"
+        className="min-h-screen bg-[var(--bg-page)] flex flex-col items-center justify-center p-4 font-mono"
         dir={mounted ? (lang === "he" ? "rtl" : "ltr") : undefined}
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-2xl text-center"
+          className="max-w-md w-full"
         >
-          {/* Profile Picture */}
-          <div className="mb-8 flex justify-center">
-            <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-[#5083e1] ring-offset-4">
-              <img
-                src="/propic.jpg"
-                alt="Arik"
-                className="w-full h-full object-cover object-center"
-                style={{ objectPosition: "center -48px" }}
-              />
+          {/* Title + Description */}
+          <div className="text-center mb-6">
+            <h1 className="text-2xl text-[var(--text-primary)] mb-2 font-bold">
+              {lang === "he" ? "ליווי 1:1 עם אריק" : "1:1 Coaching with Arik"}
+            </h1>
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+              {lang === "he"
+                ? "הטופס הזה נועד לעזור לי ולך כמה שיותר."
+                : "This form is designed to help me and you as much as possible."}
+            </p>
+          </div>
+
+          {/* IG-style Bio Section */}
+          <div className="bg-[var(--bg-card)] rounded-2xl p-6 mb-8" style={{ border: "1px solid var(--border-color)" }}>
+            {/* Avatar + Name row */}
+            <div className="flex items-center gap-4 mb-4" dir={lang === "he" ? "rtl" : "ltr"}>
+              <div
+                className="w-16 h-16 rounded-full flex-shrink-0 p-[2.5px]"
+                style={{ background: "linear-gradient(135deg, var(--brand-orange), var(--brand-orange-light))" }}
+              >
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <img
+                    src="/propic.jpg"
+                    alt="Arik"
+                    className="w-full h-full object-cover"
+                    style={{ objectPosition: "center -24px" }}
+                  />
+                </div>
+              </div>
+              <div className={lang === "he" ? "text-right" : "text-left"}>
+                <div className="text-base font-bold text-[var(--text-primary)]">Arik</div>
+                <div className="text-sm text-[var(--text-muted)]">@arik.moz</div>
+              </div>
+            </div>
+
+            {/* Bio text */}
+            <div className={`text-sm text-[var(--text-primary)] leading-relaxed ${lang === "he" ? "text-right" : "text-left"}`} dir={lang === "he" ? "rtl" : "ltr"}>
+              <p>{lang === "he" ? "15+ שנים של ניסיון בכושר, תזונה ומנטליות." : "15+ years of fitness, nutrition & mindset experience."} 💪🏼🔥</p>
+              <p className="text-[var(--brand-orange)] font-semibold">
+                {lang === "he" ? "90 ימים לשנות את הגוף. שנים לחיות ככה." : "90 days to change your body. Years to live like it."}
+              </p>
+              <p className="text-[var(--text-muted)] mt-1">
+                {lang === "he" ? "התחילו את הדרך שלכם עכשיו ⬇️" : "Start your journey now ⬇️"}
+              </p>
+              <p className="mt-1">
+                <span>🏋️🏃🤸‍♂️ | 👨‍💻📈🚀</span>
+              </p>
+              <p className="text-[var(--brand-orange)] text-sm mt-1">arikmoz.com</p>
             </div>
           </div>
 
-          <h1 className="text-3xl text-[#2b2b2b] mb-8 font-bold">
-            {lang === "he" ? "ליווי 1:1 עם אריק" : "1:1 Coaching with Arik"}
-          </h1>
-
-          <p className="text-base text-[#868786] mb-12 leading-relaxed max-w-xl mx-auto">
-            {lang === "he"
-              ? "הליווי הזה מיועד לאנשים רציניים לגבי המטרות שלהם. הטופס הזה נועד לעזור לי ולך כמה שיותר."
-              : "This coaching is for people who are serious about their goals. This form is designed to help me and you as much as possible."}
-          </p>
-
+          {/* CTA Section */}
+          <div className="text-center">
           <div className="flex flex-col gap-4 items-center justify-center mb-8">
             {lang === "he" ? (
               <div className="flex items-center gap-3">
@@ -559,11 +670,11 @@ export default function Home() {
                     setShowWelcome(false);
                     setLang("he");
                   }}
-                  className="px-8 py-3 bg-[#5083e1] text-black rounded font-bold text-base hover:bg-[#4a75d1] transition-colors cursor-pointer"
+                  className="px-8 py-3 bg-[var(--brand-orange)] text-[#F5F4F0] rounded font-bold text-base hover:bg-[var(--brand-orange-light)] transition-colors cursor-pointer"
                 >
                   התחל עכשיו
                 </button>
-                <span className="text-sm text-[#2b2b2b]">
+                <span className="text-sm text-[var(--text-primary)]">
                   לחץ <strong>Enter ↵</strong>
                 </span>
               </div>
@@ -574,28 +685,38 @@ export default function Home() {
                     setShowWelcome(false);
                     setLang("en");
                   }}
-                  className="px-8 py-3 bg-[#5083e1] text-black rounded font-bold text-base hover:bg-[#4a75d1] transition-colors cursor-pointer"
+                  className="px-8 py-3 bg-[var(--brand-orange)] text-[#F5F4F0] rounded font-bold text-base hover:bg-[var(--brand-orange-light)] transition-colors cursor-pointer"
                 >
                   Start Now
                 </button>
-                <span className="text-sm text-[#2b2b2b]">
+                <span className="text-sm text-[var(--text-primary)]">
                   press <strong>Enter ↵</strong>
                 </span>
               </div>
             )}
           </div>
 
-          <p className="text-[#868786] text-sm flex items-center justify-center gap-2">
+          <p className="text-[var(--text-muted)] text-sm flex items-center justify-center gap-2">
             <Clock size={16} />
             {lang === "he" ? "לוקח 3-5 דקות" : "Takes 3-5 minutes"}
           </p>
 
-          <button
-            onClick={() => setLang(lang === "he" ? "en" : "he")}
-            className="mt-6 text-sm text-[#868786] hover:text-[#2b2b2b] underline cursor-pointer"
-          >
-            {lang === "he" ? "English" : "עברית"}
-          </button>
+          <div className="mt-6 flex items-center justify-center gap-4">
+            <button
+              onClick={() => setLang(lang === "he" ? "en" : "he")}
+              className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] underline cursor-pointer"
+            >
+              {lang === "he" ? "English" : "עברית"}
+            </button>
+            <button
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              className="p-2 rounded-full text-[var(--text-muted)] hover:text-[var(--brand-orange)] transition-colors cursor-pointer"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
+          </div>
+          </div>
         </motion.div>
       </div>
     );
@@ -683,13 +804,24 @@ export default function Home() {
   // Question Screen
   return (
     <div
-      className="min-h-screen bg-[#f3f3f3] flex flex-col font-mono"
+      className="min-h-screen bg-[var(--bg-page)] flex flex-col font-mono relative"
       dir={mounted ? (lang === "he" ? "rtl" : "ltr") : undefined}
     >
+      {/* Theme toggle */}
+      <div className="absolute top-3 right-3 z-10">
+        <button
+          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          className="p-2 rounded-full text-[var(--text-muted)] hover:text-[var(--brand-orange)] transition-colors cursor-pointer"
+          aria-label="Toggle theme"
+        >
+          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+        </button>
+      </div>
+
       {/* Progress Bar */}
-      <div className="w-full h-1 bg-gray-200">
+      <div className="w-full h-1 bg-[var(--border-color)]">
         <motion.div
-          className="h-full bg-[#5083e1]"
+          className="h-full bg-[var(--brand-orange)]"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.3 }}
@@ -710,21 +842,21 @@ export default function Home() {
               {/* Back Button */}
               <button
                 onClick={handleBack}
-                className="mb-6 text-[#868786] hover:text-[#2b2b2b] text-sm cursor-pointer transition-colors"
+                className="mb-6 text-[var(--text-muted)] hover:text-[var(--text-primary)] text-sm cursor-pointer transition-colors"
               >
                 {lang === "he" ? "→ חזור אחורה" : "← Go back"}
               </button>
 
               {/* Question number and title */}
               <div className="mb-4">
-                <span className="text-base text-[#2b2b2b] font-bold">
+                <span className="text-base text-[var(--text-primary)] font-bold">
                   {currentStep + 1}. {displayQuestion}
                 </span>
               </div>
 
               {/* Description (optional) */}
               {!currentQuestion.hideDescription && (
-                <p className="text-sm text-[#868786] italic mb-8">
+                <p className="text-sm text-[var(--text-muted)] italic mb-8">
                   {lang === "he"
                     ? currentQuestion.descriptionHe || "תיאור (אופציונלי)"
                     : currentQuestion.description || "Description (optional)"}
@@ -735,7 +867,7 @@ export default function Home() {
               {currentQuestion.type === "multi-choice" &&
                 (currentQuestion.multiChoiceNote ||
                   currentQuestion.multiChoiceNoteHe) && (
-                  <p className="text-sm text-[#868786] italic mb-4">
+                  <p className="text-sm text-[var(--text-muted)] italic mb-4">
                     {lang === "he"
                       ? currentQuestion.multiChoiceNoteHe
                       : currentQuestion.multiChoiceNote}
@@ -753,14 +885,14 @@ export default function Home() {
                       <button
                         key={index}
                         onClick={() => handleChoice(option)}
-                        className={`w-full text-left px-5 py-3 bg-white border rounded transition-all text-base group cursor-pointer ${
+                        className={`w-full text-left px-5 py-3 bg-[var(--bg-card)] border rounded transition-all text-base group cursor-pointer ${
                           isSelected && wasAlreadyAnswered
-                            ? "border-[#5083e1] bg-[#5083e1]/10 text-[#2b2b2b]"
-                            : "border-gray-300 hover:border-[#5083e1] hover:bg-[#5083e1]/5 text-[#2b2b2b]"
+                            ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 text-[var(--text-primary)]"
+                            : "border-[var(--border-color)] hover:border-[var(--brand-orange)] hover:bg-[var(--brand-orange)]/5 text-[var(--text-primary)]"
                         }`}
                       >
                         <span
-                          className={`mr-3 text-sm ${isSelected && wasAlreadyAnswered ? "text-[#5083e1]" : "text-[#868786] group-hover:text-[#5083e1]"}`}
+                          className={`mr-3 text-sm ${isSelected && wasAlreadyAnswered ? "text-[var(--brand-orange)]" : "text-[var(--text-muted)] group-hover:text-[var(--brand-orange)]"}`}
                         >
                           {isSelected && wasAlreadyAnswered
                             ? "✓"
@@ -779,18 +911,18 @@ export default function Home() {
                       <button
                         key={index}
                         onClick={() => handleMultiChoiceToggle(option)}
-                        className={`w-full text-left px-5 py-3 bg-white border rounded transition-all text-base group cursor-pointer ${
+                        className={`w-full text-left px-5 py-3 bg-[var(--bg-card)] border rounded transition-all text-base group cursor-pointer ${
                           isSelected
-                            ? "border-[#5083e1] bg-[#5083e1]/10"
-                            : "border-gray-300 hover:border-[#5083e1] hover:bg-[#5083e1]/5"
+                            ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10"
+                            : "border-[var(--border-color)] hover:border-[var(--brand-orange)] hover:bg-[var(--brand-orange)]/5"
                         }`}
                       >
                         <span
-                          className={`mr-3 text-sm ${isSelected ? "text-[#5083e1]" : "text-[#868786] group-hover:text-[#5083e1]"}`}
+                          className={`mr-3 text-sm ${isSelected ? "text-[var(--brand-orange)]" : "text-[var(--text-muted)] group-hover:text-[var(--brand-orange)]"}`}
                         >
                           {isSelected ? "✓" : String.fromCharCode(65 + index)}
                         </span>
-                        <span className="text-[#2b2b2b]">{option}</span>
+                        <span className="text-[var(--text-primary)]">{option}</span>
                       </button>
                     );
                   })}
@@ -803,7 +935,7 @@ export default function Home() {
                     phone: answers.phone,
                   })}
                   <div
-                    className="w-full bg-white rounded-lg p-4 shadow-lg"
+                    className="w-full bg-[var(--bg-card)] rounded-lg p-4 shadow-lg"
                     style={{ minHeight: "500px" }}
                   >
                     <Cal
@@ -824,7 +956,7 @@ export default function Home() {
                       }}
                     />
                     {calendarBooked && (
-                      <div className="mt-4 p-4 text-black rounded text-center">
+                      <div className="mt-4 p-4 text-[var(--text-primary)] rounded text-center">
                         <div className="text-xl font-bold mb-2">
                           {lang === "he" ? "תודה רבה!" : "Thank you!"}
                         </div>
@@ -835,7 +967,7 @@ export default function Home() {
                         </div>
                         <button
                           onClick={() => window.location.reload()}
-                          className="px-6 py-3 bg-[#5083e1] text-black rounded font-bold text-base hover:bg-[#4a75d1] transition-colors cursor-pointer "
+                          className="px-6 py-3 bg-[var(--brand-orange)] text-[#F5F4F0] rounded font-bold text-base hover:bg-[var(--brand-orange-light)] transition-colors cursor-pointer "
                         >
                           {lang === "he"
                             ? "חזרה למסך הבית"
@@ -860,7 +992,7 @@ export default function Home() {
                       }
                     }}
                     placeholder={displayPlaceholder}
-                    className="w-full bg-transparent border-b border-gray-300 py-2 text-[#2b2b2b] text-lg placeholder-gray-300 focus:outline-none focus:border-[#5083e1] transition-colors resize-none"
+                    className="w-full bg-transparent border-b border-[var(--border-color)] py-2 text-[var(--text-primary)] text-lg placeholder-[var(--placeholder-color)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors resize-none"
                     rows={1}
                     autoFocus
                   />
@@ -876,10 +1008,10 @@ export default function Home() {
                     }}
                     onKeyPress={handleKeyPress}
                     placeholder={displayPlaceholder}
-                    className={`w-full bg-transparent border-b py-2 text-[#2b2b2b] text-lg placeholder-gray-300 focus:outline-none transition-colors ${
+                    className={`w-full bg-transparent border-b py-2 text-[var(--text-primary)] text-lg placeholder-[var(--placeholder-color)] focus:outline-none transition-colors ${
                       validationError
                         ? "border-red-500 focus:border-red-500"
-                        : "border-gray-300 focus:border-[#5083e1]"
+                        : "border-[var(--border-color)] focus:border-[var(--brand-orange)]"
                     }`}
                     autoFocus
                   />
@@ -895,7 +1027,7 @@ export default function Home() {
                 currentQuestion.type !== "multi-choice" &&
                 currentQuestion.type !== "calendar" &&
                 !isSubmitting && (
-                  <div className="mt-8 text-sm text-[#2b2b2b] hidden md:block">
+                  <div className="mt-8 text-sm text-[var(--text-primary)] hidden md:block">
                     {lang === "he" ? (
                       <>
                         לחץ <strong>Enter ↵</strong>
@@ -909,7 +1041,7 @@ export default function Home() {
                 )}
 
               {currentQuestion.type === "textarea" && (
-                <div className="mt-4 text-xs text-[#868786]">
+                <div className="mt-4 text-xs text-[var(--text-muted)]">
                   {lang === "he"
                     ? "Shift + Enter ליצירת שורה חדשה"
                     : "Shift + Enter to make a line break"}
@@ -943,7 +1075,7 @@ export default function Home() {
                             !currentAnswer.trim() &&
                             currentQuestion.hideDescription !== false)
                         }
-                        className="px-6 py-3 bg-[#5083e1] text-black rounded font-bold text-base hover:bg-[#4a75d1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        className="px-6 py-3 bg-[var(--brand-orange)] text-[#F5F4F0] rounded font-bold text-base hover:bg-[var(--brand-orange-light)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
                         {isSubmitting
                           ? lang === "he"
