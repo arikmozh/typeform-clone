@@ -646,7 +646,7 @@ export default function Home() {
 
             {/* Bio text */}
             <div className={`text-sm text-[var(--text-primary)] leading-relaxed ${lang === "he" ? "text-right" : "text-left"}`} dir={lang === "he" ? "rtl" : "ltr"}>
-              <p>{lang === "he" ? "15+ שנים של ניסיון בכושר, תזונה ומנטליות." : "15+ years of fitness, nutrition & mindset experience."} 💪🏼🔥</p>
+              <p>{lang === "he" ? "15+ שנים של ניסיון בכושר, תזונה ואורח חיים." : "15+ years of fitness, nutrition & lifestyle experience."} 💪🏼🔥</p>
               <p className="text-[var(--brand-orange)] font-semibold">
                 {lang === "he" ? "90 ימים לשנות את הגוף. שנים לחיות ככה." : "90 days to change your body. Years to live like it."}
               </p>
