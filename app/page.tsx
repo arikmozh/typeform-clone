@@ -77,6 +77,27 @@ const questions: Question[] = [
     hideDescription: true,
   },
   {
+    id: "why_now",
+    type: "choice",
+    question: "What made you reach out now?",
+    questionHe: "מה גרם לך לפנות עכשיו?",
+    options: [
+      "Something changed in my life",
+      "I'm tired of my current situation",
+      "I want to improve my performance",
+      "Health / doctor's recommendation",
+      "Wedding / upcoming event",
+    ],
+    optionsHe: [
+      "משהו השתנה בחיים שלי",
+      "נמאס לי מהמצב",
+      "רוצה לשפר ביצועים",
+      "בריאות / המלצת רופא",
+      "חתונה / אירוע קרוב",
+    ],
+    hideDescription: true,
+  },
+  {
     id: "main_goal",
     type: "multi-choice",
     question: "What's your main goal?",
@@ -113,6 +134,27 @@ const questions: Question[] = [
     hideDescription: true,
     multiChoiceNote: "Select all that apply",
     multiChoiceNoteHe: "ניתן לבחור יותר מאחד",
+  },
+  {
+    id: "main_blocker",
+    type: "choice",
+    question: "What's the biggest thing holding you back?",
+    questionHe: "מה הדבר הכי גדול שמעכב אותך?",
+    options: [
+      "No time",
+      "Lack of motivation",
+      "Don't know where to start",
+      "Inconsistent nutrition",
+      "Keep falling off track",
+    ],
+    optionsHe: [
+      "אין לי זמן",
+      "חוסר מוטיבציה",
+      "לא יודע מאיפה להתחיל",
+      "תזונה לא מסודרת",
+      "נפילות חוזרות",
+    ],
+    hideDescription: true,
   },
   {
     id: "training_experience",
@@ -225,6 +267,35 @@ const questions: Question[] = [
     placeholderHe: "הקלד את התשובה שלך כאן...",
     placeholderHeMale: "הקלד את התשובה שלך כאן...",
     placeholderHeFemale: "הקלידי את התשובה שלך כאן...",
+    hideDescription: true,
+  },
+  {
+    id: "format_preference",
+    type: "choice",
+    question: "What works best for you?",
+    questionHe: "מה מתאים לך יותר?",
+    questionHeMale: "מה מתאים לך יותר?",
+    questionHeFemale: "מה מתאים לך יותר?",
+    options: [
+      "Personal 1:1 coaching with Arik",
+      "Workout program / meal plan from my experience — things that actually worked on me and others over the years",
+      "Not sure yet",
+    ],
+    optionsHe: [
+      "ליווי אישי 1:1 עם אריק",
+      "תוכנית אימונים / תפריט תזונה מהניסיון שלי — דברים שאשכרה עבדו עלי ועל אחרים לאורך השנים",
+      "עדיין לא יודע",
+    ],
+    optionsHeMale: [
+      "ליווי אישי 1:1 עם אריק",
+      "תוכנית אימונים / תפריט תזונה מהניסיון שלי — דברים שאשכרה עבדו עלי ועל אחרים לאורך השנים",
+      "עדיין לא יודע",
+    ],
+    optionsHeFemale: [
+      "ליווי אישי 1:1 עם אריק",
+      "תוכנית אימונים / תפריט תזונה מהניסיון שלי — דברים שאשכרה עבדו עלי ועל אחרים לאורך השנים",
+      "עדיין לא יודעת",
+    ],
     hideDescription: true,
   },
   {
@@ -547,8 +618,8 @@ export default function Home() {
 
           <p className="text-base text-[#868786] mb-12 leading-relaxed max-w-xl mx-auto">
             {lang === "he"
-              ? "הליווי הזה מיועד לאנשים רציניים לגבי המטרות שלהם. הטופס הזה נועד לעזור לי ולך כמה שיותר."
-              : "This coaching is for people who are serious about their goals. This form is designed to help me and you as much as possible."}
+              ? "הטופס הזה נועד לעזור לי ולך כמה שיותר."
+              : "This form is designed to help me and you as much as possible."}
           </p>
 
           <div className="flex flex-col gap-4 items-center justify-center mb-8">
