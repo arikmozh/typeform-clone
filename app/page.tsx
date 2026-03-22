@@ -607,30 +607,61 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-2xl text-center"
+          className="max-w-md w-full"
         >
-          {/* Profile Picture */}
-          <div className="mb-8 flex justify-center">
-            <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-[var(--brand-orange)] ring-offset-4 ring-offset-[var(--bg-page)]">
-              <img
-                src="/propic.jpg"
-                alt="Arik"
-                className="w-full h-full object-cover object-center"
-                style={{ objectPosition: "center -48px" }}
-              />
+          {/* Title + Description */}
+          <div className="text-center mb-6">
+            <h1 className="text-2xl text-[var(--text-primary)] mb-2 font-bold">
+              {lang === "he" ? "ליווי 1:1 עם אריק" : "1:1 Coaching with Arik"}
+            </h1>
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+              {lang === "he"
+                ? "הטופס הזה נועד לעזור לי ולך כמה שיותר."
+                : "This form is designed to help me and you as much as possible."}
+            </p>
+          </div>
+
+          {/* IG-style Bio Section */}
+          <div className="bg-[var(--bg-card)] rounded-2xl p-6 mb-8" style={{ border: "1px solid var(--border-color)" }}>
+            {/* Avatar + Name row */}
+            <div className="flex items-center gap-4 mb-4" dir={lang === "he" ? "rtl" : "ltr"}>
+              <div
+                className="w-16 h-16 rounded-full flex-shrink-0 p-[2.5px]"
+                style={{ background: "linear-gradient(135deg, var(--brand-orange), var(--brand-orange-light))" }}
+              >
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <img
+                    src="/propic.jpg"
+                    alt="Arik"
+                    className="w-full h-full object-cover"
+                    style={{ objectPosition: "center -24px" }}
+                  />
+                </div>
+              </div>
+              <div className={lang === "he" ? "text-right" : "text-left"}>
+                <div className="text-base font-bold text-[var(--text-primary)]">Arik</div>
+                <div className="text-sm text-[var(--text-muted)]">@arik.moz</div>
+              </div>
+            </div>
+
+            {/* Bio text */}
+            <div className={`text-sm text-[var(--text-primary)] leading-relaxed ${lang === "he" ? "text-right" : "text-left"}`} dir={lang === "he" ? "rtl" : "ltr"}>
+              <p>{lang === "he" ? "15+ שנים של ניסיון בכושר, תזונה ומנטליות." : "15+ years of fitness, nutrition & mindset experience."} 💪🏼🔥</p>
+              <p className="text-[var(--brand-orange)] font-semibold">
+                {lang === "he" ? "90 ימים לשנות את הגוף. שנים לחיות ככה." : "90 days to change your body. Years to live like it."}
+              </p>
+              <p className="text-[var(--text-muted)] mt-1">
+                {lang === "he" ? "התחילו את הדרך שלכם עכשיו ⬇️" : "Start your journey now ⬇️"}
+              </p>
+              <p className="mt-1">
+                <span>🏋️🏃🤸‍♂️ | 👨‍💻📈🚀</span>
+              </p>
+              <p className="text-[var(--brand-orange)] text-sm mt-1">arikmoz.com</p>
             </div>
           </div>
 
-          <h1 className="text-3xl text-[var(--text-primary)] mb-8 font-bold">
-            {lang === "he" ? "ליווי 1:1 עם אריק" : "1:1 Coaching with Arik"}
-          </h1>
-
-          <p className="text-base text-[var(--text-muted)] mb-12 leading-relaxed max-w-xl mx-auto">
-            {lang === "he"
-              ? "הטופס הזה נועד לעזור לי ולך כמה שיותר."
-              : "This form is designed to help me and you as much as possible."}
-          </p>
-
+          {/* CTA Section */}
+          <div className="text-center">
           <div className="flex flex-col gap-4 items-center justify-center mb-8">
             {lang === "he" ? (
               <div className="flex items-center gap-3">
@@ -684,6 +715,7 @@ export default function Home() {
             >
               {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
             </button>
+          </div>
           </div>
         </motion.div>
       </div>
