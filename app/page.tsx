@@ -612,7 +612,7 @@ export default function Home() {
           {/* Title + Description */}
           <div className="text-center mb-6">
             <h1 className="text-2xl text-[var(--text-primary)] mb-2 font-bold">
-              {lang === "he" ? "ליווי 1:1 עם אריק" : "1:1 Coaching with Arik"}
+              {lang === "he" ? "הצעד הראשון שלך מתחיל כאן" : "Your first step starts here"}
             </h1>
             <p className="text-sm text-[var(--text-muted)] leading-relaxed">
               {lang === "he"
@@ -646,17 +646,14 @@ export default function Home() {
 
             {/* Bio text */}
             <div className={`text-sm text-[var(--text-primary)] leading-relaxed ${lang === "he" ? "text-right" : "text-left"}`} dir={lang === "he" ? "rtl" : "ltr"}>
-              <p>{lang === "he" ? "15+ שנים של ניסיון בכושר, תזונה ואורח חיים." : "15+ years of fitness, nutrition & lifestyle experience."} 💪🏼🔥</p>
+              <p>{lang === "he" ? "- 15 שנה של ניסיון בכושר, מנדיימסט ואורח" : "- 15 years of fitness, mindset & lifestyle"}</p>
+              <p>{lang === "he" ? "חיים." : "experience."} 💪🏼🔥</p>
               <p className="text-[var(--brand-orange)] font-semibold">
-                {lang === "he" ? "90 ימים לשנות את הגוף. שנים לחיות ככה." : "90 days to change your body. Years to live like it."}
+                {lang === "he" ? "- 90 ימים לשנות את עצמך. שנים לחיות ככה." : "- 90 days to transform yourself. Years to live like it."}
               </p>
               <p className="text-[var(--text-muted)] mt-1">
-                {lang === "he" ? "התחילו את הדרך שלכם עכשיו ⬇️" : "Start your journey now ⬇️"}
+                {lang === "he" ? "- השאירו פרטים ונדבר 👇" : "- Leave your details and let's talk 👇"}
               </p>
-              <p className="mt-1">
-                <span>🏋️🏃🤸‍♂️ | 👨‍💻📈🚀</span>
-              </p>
-              <p className="text-[var(--brand-orange)] text-sm mt-1">arikmoz.com</p>
             </div>
           </div>
 
