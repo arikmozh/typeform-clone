@@ -72,8 +72,8 @@ const questions: Question[] = [
     questionHe: "מה מספר הפלאפון שלך?",
     questionHeMale: "מה מספר הפלאפון שלך?",
     questionHeFemale: "מה מספר הפלאפון שלך?",
-    placeholder: "(201) 555-0123",
-    placeholderHe: "050-123-4567",
+    placeholder: "555-0123",
+    placeholderHe: "50-123-4567",
     hideDescription: true,
   },
   {
@@ -229,14 +229,14 @@ const questions: Question[] = [
     questionHe: "לאיזה ציוד יש לך גישה?",
     options: [
       "Full gym",
-      "Home gym / dumbbells",
+      "Home gym / dumbbells / kettlebell",
       "Bodyweight only",
       "Jump rope",
       "Resistance bands",
     ],
     optionsHe: [
       "חדר כושר מלא",
-      "חדר כושר ביתי / משקולות",
+      "חדר כושר ביתי / משקולות / קטלבל",
       "משקל גוף בלבד",
       "חבל קפיצה",
       "רצועות התנגדות",
@@ -392,6 +392,10 @@ export default function Home() {
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
 
+  const phonePrefix = lang === "he" ? "+972 " : "+1 ";
+
+  const getPhoneDefault = () => phonePrefix;
+
   // Initialize Cal.com and listen for booking events
   useEffect(() => {
     if (currentQuestion?.type === "calendar") {
@@ -400,7 +404,7 @@ export default function Home() {
 
         // Configure UI with week view and theme
         cal("ui", {
-          theme: "light",
+          theme: theme,
           cssVarsPerTheme: {
             light: {
               "cal-brand": "#E05A00",
@@ -441,7 +445,7 @@ export default function Home() {
         });
       })();
     }
-  }, [currentQuestion?.type, currentStep, answers]);
+  }, [currentQuestion?.type, currentStep, answers, theme]);
 
   const handleNext = async () => {
     // Clear previous validation errors
@@ -463,8 +467,8 @@ export default function Home() {
 
     // Validate phone number (step 4)
     if (currentQuestion.type === "phone") {
-      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
-      if (!phoneRegex.test(currentAnswer) || currentAnswer.length < 9) {
+      const digitsOnly = currentAnswer.replace(/[^\d]/g, "");
+      if (!/^\+\d[\d\s\-]*$/.test(currentAnswer) || digitsOnly.length < 9) {
         setValidationError(
           lang === "he"
             ? "אנא הזן מספר טלפון תקין"
@@ -502,7 +506,9 @@ export default function Home() {
       setCurrentStep(currentStep + 1);
       const nextQuestion = questions[currentStep + 1];
       const nextAnswer = newAnswers[nextQuestion.id] || "";
-      setCurrentAnswer(nextAnswer);
+      setCurrentAnswer(
+        nextQuestion.type === "phone" && !nextAnswer ? getPhoneDefault() : nextAnswer
+      );
 
       // If next question is multi-choice, parse the stored answer
       if (nextQuestion.type === "multi-choice") {
@@ -575,7 +581,9 @@ export default function Home() {
       setCurrentStep(currentStep - 1);
       const prevQuestion = questions[currentStep - 1];
       const prevAnswer = answers[prevQuestion.id] || "";
-      setCurrentAnswer(prevAnswer);
+      setCurrentAnswer(
+        prevQuestion.type === "phone" && !prevAnswer ? getPhoneDefault() : prevAnswer
+      );
 
       // If previous question is multi-choice, parse the stored answer
       if (prevQuestion.type === "multi-choice") {
@@ -646,13 +654,15 @@ export default function Home() {
 
             {/* Bio text */}
             <div className={`text-sm text-[var(--text-primary)] leading-relaxed ${lang === "he" ? "text-right" : "text-left"}`} dir={lang === "he" ? "rtl" : "ltr"}>
-              <p>{lang === "he" ? "- 15 שנה של ניסיון בכושר, מנדיימסט ואורח" : "- 15 years of fitness, mindset & lifestyle"}</p>
-              <p>{lang === "he" ? "חיים." : "experience."} 💪🏼🔥</p>
-              <p className="text-[var(--brand-orange)] font-semibold">
-                {lang === "he" ? "- 90 ימים לשנות את עצמך. שנים לחיות ככה." : "- 90 days to transform yourself. Years to live like it."}
+              <p>{lang === "he" ? "15+ שנים של ניסיון בכושר, תזונה ובריאות 💪🏼" : "15+ years of experience in fitness, nutrition & health 💪🏼"}</p>
+              <p className="mt-2">
+                {lang === "he" ? "אני לא מוכר לך 90 יום של מוטיבציה" : "I'm not selling you 90 days of motivation"}
               </p>
-              <p className="text-[var(--text-muted)] mt-1">
-                {lang === "he" ? "- השאירו פרטים ונדבר 👇" : "- Leave your details and let's talk 👇"}
+              <p className="text-[var(--brand-orange)] font-semibold">
+                {lang === "he" ? "אני עוזר לך לבנות אורח חיים שישאר איתך לתמיד" : "I help you build a lifestyle that stays with you forever"}
+              </p>
+              <p className="text-[var(--text-muted)] mt-2">
+                {lang === "he" ? "מלא את הטופס — ואחזור אליך אישית ⬇️" : "Fill out the form — and I'll get back to you personally ⬇️"}
               </p>
             </div>
           </div>
@@ -945,7 +955,8 @@ export default function Home() {
                       }}
                       config={{
                         layout: "week_view",
-                        theme: "light",
+                        theme: theme,
+                        hourFormat: "24",
                         name: answers.name || "",
                         email: answers.email || "",
                         phone: answers.phone || "",
@@ -997,10 +1008,21 @@ export default function Home() {
               ) : (
                 <>
                   <input
-                    type={currentQuestion.type}
+                    type={currentQuestion.type === "phone" ? "tel" : currentQuestion.type}
+                    inputMode={currentQuestion.type === "phone" ? "tel" : undefined}
+                    dir={currentQuestion.type === "phone" ? "ltr" : undefined}
                     value={currentAnswer}
                     onChange={(e) => {
-                      setCurrentAnswer(e.target.value);
+                      if (currentQuestion.type === "phone") {
+                        const val = e.target.value;
+                        // Must start with +, only allow digits, spaces, and dashes after
+                        if (!val.startsWith("+")) return;
+                        const afterPlus = val.slice(1);
+                        if (afterPlus && !/^[\d\s\-]*$/.test(afterPlus)) return;
+                        setCurrentAnswer(val);
+                      } else {
+                        setCurrentAnswer(e.target.value);
+                      }
                       setValidationError("");
                     }}
                     onKeyPress={handleKeyPress}
