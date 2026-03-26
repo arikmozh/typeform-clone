@@ -468,7 +468,7 @@ export default function Home() {
     // Validate phone number (step 4)
     if (currentQuestion.type === "phone") {
       const digitsOnly = currentAnswer.replace(/[^\d]/g, "");
-      if (!/^\+\d[\d\s\-]*$/.test(currentAnswer) || digitsOnly.length < 9) {
+      if (!/^[+\d][\d\s\-]*$/.test(currentAnswer) || digitsOnly.length < 9) {
         setValidationError(
           lang === "he"
             ? "אנא הזן מספר טלפון תקין"
@@ -1015,10 +1015,8 @@ export default function Home() {
                     onChange={(e) => {
                       if (currentQuestion.type === "phone") {
                         const val = e.target.value;
-                        // Must start with +, only allow digits, spaces, and dashes after
-                        if (!val.startsWith("+")) return;
-                        const afterPlus = val.slice(1);
-                        if (afterPlus && !/^[\d\s\-]*$/.test(afterPlus)) return;
+                        // Only allow digits, spaces, dashes, and optional + at start
+                        if (!/^[+\d][\d\s\-]*$/.test(val) && val !== "") return;
                         setCurrentAnswer(val);
                       } else {
                         setCurrentAnswer(e.target.value);
