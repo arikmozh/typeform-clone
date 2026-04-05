@@ -100,6 +100,19 @@ const questions: Question[] = [
     multiChoiceNoteHe: "ניתן לבחור יותר מאחד",
   },
   {
+    id: "real_reason",
+    type: "textarea",
+    question: "If you're being honest with yourself — what's the real reason you're here?",
+    questionHe: "אם את/ה כנה עם עצמך — מה הסיבה האמיתית שאת/ה כאן?",
+    questionHeMale: "אם אתה כנה עם עצמך — מה הסיבה האמיתית שאתה כאן?",
+    questionHeFemale: "אם את כנה עם עצמך — מה הסיבה האמיתית שאת כאן?",
+    placeholder: "Type your answer here...",
+    placeholderHe: "הקלד את התשובה שלך כאן...",
+    placeholderHeMale: "הקלד את התשובה שלך כאן...",
+    placeholderHeFemale: "הקלידי את התשובה שלך כאן...",
+    hideDescription: true,
+  },
+  {
     id: "main_goal",
     type: "multi-choice",
     question: "What's your main goal?",
@@ -199,53 +212,6 @@ const questions: Question[] = [
     hideDescription: true,
   },
   {
-    id: "daily_training_time",
-    type: "choice",
-    question: "How much time do you have for training/movement per day?",
-    questionHe: "כמה זמן יש לך לאימון/תנועה ביום?",
-    questionHeMale: "כמה זמן יש לך לאימון/תנועה ביום?",
-    questionHeFemale: "כמה זמן יש לך לאימון/תנועה ביום?",
-    options: ["10 minutes", "30 minutes", "1 hour", "More than 1 hour"],
-    optionsHe: ["10 דקות", "30 דקות", "שעה", "יותר משעה"],
-    hideDescription: true,
-  },
-  {
-    id: "diet",
-    type: "choice",
-    question: "How is your diet?",
-    questionHe: "איך התזונה שלך?",
-    questionHeMale: "איך התזונה שלך?",
-    questionHeFemale: "איך התזונה שלך?",
-    options: ["Vegetarian", "Vegan", "No restrictions"],
-    optionsHe: ["צמחוני", "טבעוני", "לא בעייתי"],
-    optionsHeMale: ["צמחוני", "טבעוני", "לא בעייתי"],
-    optionsHeFemale: ["צמחונית", "טבעונית", "לא בעייתי"],
-    hideDescription: true,
-  },
-  {
-    id: "equipment",
-    type: "multi-choice",
-    question: "What equipment do you have access to?",
-    questionHe: "לאיזה ציוד יש לך גישה?",
-    options: [
-      "Full gym",
-      "Home gym / dumbbells / kettlebell",
-      "Bodyweight only",
-      "Jump rope",
-      "Resistance bands",
-    ],
-    optionsHe: [
-      "חדר כושר מלא",
-      "חדר כושר ביתי / משקולות / קטלבל",
-      "משקל גוף בלבד",
-      "חבל קפיצה",
-      "רצועות התנגדות",
-    ],
-    hideDescription: true,
-    multiChoiceNote: "Select all that apply",
-    multiChoiceNoteHe: "ניתן לבחור יותר מאחד",
-  },
-  {
     id: "injuries",
     type: "textarea",
     question: "Do you have any injuries or physical limitations?",
@@ -331,19 +297,6 @@ const questions: Question[] = [
       "אני צריכה יותר מידע קודם",
       "המחיר מחוץ לתקציב שלי",
     ],
-    hideDescription: true,
-  },
-  {
-    id: "additional_info",
-    type: "textarea",
-    question: "Anything else you want me to know?",
-    questionHe: "משהו נוסף שתרצה שאדע?",
-    questionHeMale: "משהו נוסף שתרצה שאדע?",
-    questionHeFemale: "משהו נוסף שתרצי שאדע?",
-    placeholder: "Type your answer here...",
-    placeholderHe: "הקלד את התשובה שלך כאן...",
-    placeholderHeMale: "הקלד את התשובה שלך כאן...",
-    placeholderHeFemale: "הקלידי את התשובה שלך כאן...",
     hideDescription: true,
   },
   {
@@ -502,22 +455,42 @@ export default function Home() {
     };
     setAnswers(newAnswers);
 
+    // Check if the next step is the calendar (optional) — submit lead now
+    const nextQuestion = currentStep < questions.length - 1 ? questions[currentStep + 1] : null;
+    if (nextQuestion?.type === "calendar") {
+      // Submit lead to Supabase BEFORE showing calendar
+      try {
+        await fetch("/api/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newAnswers),
+        });
+      } catch (error) {
+        console.error("Error submitting lead:", error);
+      }
+      // Advance to calendar step
+      setCurrentStep(currentStep + 1);
+      setCurrentAnswer("");
+      setMultiChoices([]);
+      return;
+    }
+
     if (currentStep < questions.length - 1) {
       setCurrentStep(currentStep + 1);
-      const nextQuestion = questions[currentStep + 1];
-      const nextAnswer = newAnswers[nextQuestion.id] || "";
+      const next = questions[currentStep + 1];
+      const nextAnswer = newAnswers[next.id] || "";
       setCurrentAnswer(
-        nextQuestion.type === "phone" && !nextAnswer ? getPhoneDefault() : nextAnswer
+        next.type === "phone" && !nextAnswer ? getPhoneDefault() : nextAnswer
       );
 
       // If next question is multi-choice, parse the stored answer
-      if (nextQuestion.type === "multi-choice") {
+      if (next.type === "multi-choice") {
         setMultiChoices(nextAnswer ? nextAnswer.split(", ") : []);
       } else {
         setMultiChoices([]);
       }
     } else {
-      // Submit form
+      // Submit form (fallback — shouldn't reach here with calendar as last)
       setIsSubmitting(true);
       try {
         const response = await fetch("/api/submit", {
@@ -662,7 +635,7 @@ export default function Home() {
                 {lang === "he" ? "אני עוזר לך לבנות אורח חיים שישאר איתך לתמיד" : "I help you build a lifestyle that stays with you forever"}
               </p>
               <p className="text-[var(--text-muted)] mt-2">
-                {lang === "he" ? "מלא את הטופס — ואחזור אליך אישית ⬇️" : "Fill out the form — and I'll get back to you personally ⬇️"}
+                {lang === "he" ? "מלאו את הטופס — ואחזור אליכם אישית ⬇️" : "Fill out the form — and I'll get back to you personally ⬇️"}
               </p>
             </div>
           </div>
@@ -752,11 +725,27 @@ export default function Home() {
           <h1 className="text-3xl mb-4 font-bold">
             {lang === "he" ? "תודה רבה!" : "Thank you!"}
           </h1>
-          <p className="text-lg">
-            {lang === "he"
-              ? "הפגישה נקבעה בהצלחה! נתראה בקרוב."
-              : "Consultation booked successfully! See you soon."}
+          <p className="text-lg mb-8">
+            {calendarBooked
+              ? lang === "he"
+                ? "הפגישה נקבעה בהצלחה! נתראה בקרוב."
+                : "Consultation booked successfully! See you soon."
+              : lang === "he"
+                ? "אחזור אליך אישית בהקדם."
+                : "I'll get back to you personally."}
           </p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2 }}
+          >
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-white/20 text-white rounded font-bold text-base hover:bg-white/30 transition-colors cursor-pointer backdrop-blur-sm"
+            >
+              {lang === "he" ? "חזרה למסך הבית" : "Back to home"}
+            </button>
+          </motion.div>
         </motion.div>
       </div>
     );
@@ -936,11 +925,16 @@ export default function Home() {
                 </div>
               ) : currentQuestion.type === "calendar" ? (
                 <>
-                  {console.log("Cal.com prefill data:", {
-                    name: answers.name,
-                    email: answers.email,
-                    phone: answers.phone,
-                  })}
+                  {!calendarBooked && (
+                    <div className="mb-4">
+                      <button
+                        onClick={() => setIsComplete(true)}
+                        className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] underline cursor-pointer transition-colors"
+                      >
+                        {lang === "he" ? "דלג ←" : "Skip →"}
+                      </button>
+                    </div>
+                  )}
                   <div
                     className="w-full bg-[var(--bg-card)] rounded-lg p-4 shadow-lg"
                     style={{ minHeight: "500px" }}

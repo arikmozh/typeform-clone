@@ -9,21 +9,23 @@ CREATE TABLE IF NOT EXISTS leads (
   phone TEXT,
   email TEXT,
 
+  -- Context
+  why_now TEXT,
+  real_reason TEXT,
+  main_blocker TEXT,
+
   -- Fitness Goals
   main_goal TEXT,
   training_experience TEXT,
   training_days TEXT,
-  daily_training_time TEXT,
-  diet TEXT,
-  equipment TEXT,
 
   -- Health & History
   injuries TEXT,
   tried_before TEXT,
 
-  -- Investment & Additional
+  -- Preference & Investment
+  format_preference TEXT,
   investment TEXT,
-  additional_info TEXT,
 
   -- Complete answers as JSON
   answers JSONB,
