@@ -20,15 +20,13 @@ export async function POST(req: Request) {
 
       // Context
       why_now: answers.why_now,
+      real_reason: answers.real_reason,
 
       // Fitness Goals
       main_goal: answers.main_goal,
       main_blocker: answers.main_blocker,
       training_experience: answers.training_experience,
       training_days: answers.training_days,
-      daily_training_time: answers.daily_training_time,
-      diet: answers.diet,
-      equipment: answers.equipment,
 
       // Health & History
       injuries: answers.injuries,
@@ -37,7 +35,6 @@ export async function POST(req: Request) {
       // Preference & Investment
       format_preference: answers.format_preference,
       investment: answers.investment,
-      additional_info: answers.additional_info,
 
       // Complete answers as JSON for backup
       answers: answers
