@@ -57,12 +57,12 @@ export default function Home() {
     setValidationError("");
 
     if (!name.trim()) {
-      setValidationError(isHe ? "אנא הזן שם" : "Please enter your name");
+      setValidationError(isHe ? "יש להזין שם" : "Please enter your name");
       return;
     }
     const digitsOnly = phone.replace(/[^\d]/g, "");
     if (digitsOnly.length < 9) {
-      setValidationError(isHe ? "אנא הזן מספר טלפון תקין" : "Please enter a valid phone number");
+      setValidationError(isHe ? "יש להזין מספר טלפון תקין" : "Please enter a valid phone number");
       return;
     }
 
@@ -107,7 +107,7 @@ export default function Home() {
           onClick={scrollToForm}
           className="px-4 py-1.5 bg-[var(--brand-orange)] text-[#F5F4F0] rounded text-xs font-bold hover:bg-[var(--brand-orange-light)] transition-colors cursor-pointer"
         >
-          {isHe ? "השאר פרטים" : "Get Started"}
+          {isHe ? "השאירו פרטים" : "Get Started"}
         </button>
       </div>
 
@@ -121,21 +121,21 @@ export default function Home() {
         >
           <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] leading-tight mb-8">
             {isHe
-              ? "הגעת לפה כי משהו עד עכשיו לא עבד."
+              ? "הגעתם לפה כי משהו עד עכשיו לא עבד."
               : "You're here because something hasn't worked until now."}
           </h1>
 
           <div className="text-base md:text-lg text-[var(--text-muted)] leading-relaxed space-y-2">
             <p>{isHe ? "אולי ירדת במשקל — וחזרת." : "Maybe you lost weight — and gained it back."}</p>
             <p>{isHe ? "אולי התחלת — ועצרת." : "Maybe you started — and stopped."}</p>
-            <p>{isHe ? "אולי אתה מתאמן כבר שנים ועדיין לא שם." : "Maybe you've been training for years and still aren't there."}</p>
+            <p>{isHe ? "אולי כבר מתאמנים שנים ועדיין לא שם." : "Maybe you've been training for years and still aren't there."}</p>
           </div>
 
           <div className="mt-10 text-base md:text-lg text-[var(--text-primary)] leading-relaxed space-y-1">
-            <p>{isHe ? "זה לא בגלל שאתה חלש." : "It's not because you're weak."}</p>
+            <p>{isHe ? "זה לא בגללכם." : "It's not because you're weak."}</p>
             <p className="text-[var(--brand-orange)] font-semibold">
               {isHe
-                ? "זה בגלל שאף אחד לא בנה לך תוכנית שמתאימה לך — ולחיים שיש לך."
+                ? "זה בגלל שאף אחד לא בנה תוכנית שמתאימה לכם — ולחיים שיש לכם."
                 : "It's because no one built you a plan that fits you — and the life you have."}
             </p>
           </div>
@@ -184,7 +184,7 @@ export default function Home() {
             <div className="text-base md:text-lg text-[var(--text-primary)] leading-relaxed space-y-3">
               <p>{isHe ? "אני לא בונה גוף תוצאה לרגע." : "I don't build bodies for a moment."}</p>
               <p className="font-semibold">
-                {isHe ? "אני בונה גוף תוצאה שנשאר איתך לעבוד בעוד 20 שנה." : "I build bodies that still work in 20 years."}
+                {isHe ? "אני בונה גוף תוצאה שנשאר איתכם לעבוד בעוד 20 שנה." : "I build bodies that still work in 20 years."}
               </p>
             </div>
           </FadeIn>
@@ -246,9 +246,9 @@ export default function Home() {
 
           <FadeIn delay={0.5}>
             <div className="mt-12 text-base md:text-lg text-[var(--text-primary)] leading-relaxed space-y-1">
-              <p>{isHe ? "תוך פחות מ - 90 ימים תרגיש את זה." : "Within 90 days you'll feel it."}</p>
+              <p>{isHe ? "תוך פחות מ-90 ימים תרגישו את זה." : "Within 90 days you'll feel it."}</p>
               <p className="text-[var(--brand-orange)] font-bold text-lg md:text-xl">
-                {isHe ? "לשארית החיים — תחיה את זה." : "For the rest of your life — you'll live it."}
+                {isHe ? "לשארית החיים — תחיו את זה." : "For the rest of your life — you'll live it."}
               </p>
             </div>
           </FadeIn>
@@ -275,11 +275,11 @@ export default function Home() {
           <FadeIn>
             <div className="text-center mb-10">
               <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-3">
-                {isHe ? "השאר פרטים" : "Leave Your Details"}
+                {isHe ? "השאירו פרטים" : "Leave Your Details"}
               </h2>
               <p className="text-[var(--text-muted)] text-sm">
                 {isHe
-                  ? "ואחזור אליך תוך 24 שעות. שיחה ראשונה — בלי עלות, בלי התחייבות."
+                  ? "ואחזור אליכם תוך 24 שעות. שיחה ראשונה — בלי עלות, בלי התחייבות."
                   : "I'll get back to you within 24 hours. First call — free, no commitment."}
               </p>
             </div>
@@ -298,7 +298,7 @@ export default function Home() {
                 {isHe ? "תודה רבה!" : "Thank you!"}
               </h3>
               <p className="text-[var(--text-muted)]">
-                {isHe ? "קיבלתי את הפרטים שלך, אחזור אליך בהקדם." : "Got your details, I'll get back to you soon."}
+                {isHe ? "קיבלתי את הפרטים, אחזור אליכם בהקדם." : "Got your details, I'll get back to you soon."}
               </p>
             </motion.div>
           ) : (
@@ -362,7 +362,7 @@ export default function Home() {
                     className="w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors cursor-pointer appearance-none"
                     style={{ backgroundImage: "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e\")", backgroundRepeat: "no-repeat", backgroundPosition: isHe ? "left 12px center" : "right 12px center", backgroundSize: "16px" }}
                   >
-                    <option value="" disabled>{isHe ? "בחר מטרה..." : "Choose a goal..."}</option>
+                    <option value="" disabled>{isHe ? "בחרו מטרה..." : "Choose a goal..."}</option>
                     <option value={isHe ? "ירידה במשקל / שריפת שומן" : "Weight loss / fat burn"}>{isHe ? "ירידה במשקל / שריפת שומן" : "Weight loss / fat burn"}</option>
                     <option value={isHe ? "בניית שריר וחיטוב" : "Build muscle & tone"}>{isHe ? "בניית שריר וחיטוב" : "Build muscle & tone"}</option>
                     <option value={isHe ? "שיפור כושר וסיבולת" : "Improve fitness & endurance"}>{isHe ? "שיפור כושר וסיבולת" : "Improve fitness & endurance"}</option>
@@ -386,7 +386,7 @@ export default function Home() {
                   ) : (
                     <>
                       <Send size={18} />
-                      {isHe ? "שלח — ואני אחזור אליך" : "Send — and I'll get back to you"}
+                      {isHe ? "שלח — ואני אחזור אליכם" : "Send — and I'll get back to you"}
                     </>
                   )}
                 </button>
