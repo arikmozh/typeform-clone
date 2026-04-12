@@ -13,6 +13,8 @@ export async function POST(req: Request) {
   try {
     const answers = await req.json();
 
+    console.log('Received submission:', JSON.stringify(answers));
+
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { error } = await supabase.from('leads').insert({
@@ -24,55 +26,60 @@ export async function POST(req: Request) {
     });
 
     if (error) {
-      console.error('Error saving lead:', error);
+      console.error('Supabase error:', JSON.stringify(error));
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    console.log('Lead saved to Supabase');
+
     // Send email notification for new lead
-    if (!resend) {
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: 'Leads <onboarding@resend.dev>',
+          to: [NOTIFY_EMAIL],
+          subject: `🔥 ליד חדש: ${answers.name}`,
+          html: `
+            <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #E05A00; margin-bottom: 20px;">ליד חדש נכנס! 🔥</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">שם</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${answers.name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">טלפון</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee; direction: ltr; text-align: right;">
+                    <a href="tel:${answers.phone}" style="color: #E05A00;">${answers.phone}</a>
+                  </td>
+                </tr>
+                ${answers.email ? `
+                <tr>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">אימייל</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                    <a href="mailto:${answers.email}" style="color: #E05A00;">${answers.email}</a>
+                  </td>
+                </tr>
+                ` : ''}
+                ${answers.goal ? `
+                <tr>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">מטרה</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${answers.goal}</td>
+                </tr>
+                ` : ''}
+              </table>
+              <p style="margin-top: 20px; color: #888; font-size: 13px;">
+                ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' })}
+              </p>
+            </div>
+          `,
+        });
+        console.log('Email notification sent');
+      } catch (emailError) {
+        console.error('Resend email error:', emailError);
+      }
+    } else {
       console.warn('RESEND_API_KEY not set — skipping email notification');
-    } else try {
-      await resend.emails.send({
-        from: 'Leads <onboarding@resend.dev>',
-        to: NOTIFY_EMAIL,
-        subject: `🔥 ליד חדש: ${answers.name}`,
-        html: `
-          <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #E05A00; margin-bottom: 20px;">ליד חדש נכנס! 🔥</h2>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">שם</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">${answers.name}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">טלפון</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; direction: ltr; text-align: right;">
-                  <a href="tel:${answers.phone}" style="color: #E05A00;">${answers.phone}</a>
-                </td>
-              </tr>
-              ${answers.email ? `
-              <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">אימייל</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">
-                  <a href="mailto:${answers.email}" style="color: #E05A00;">${answers.email}</a>
-                </td>
-              </tr>
-              ` : ''}
-              ${answers.goal ? `
-              <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">מטרה</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">${answers.goal}</td>
-              </tr>
-              ` : ''}
-            </table>
-            <p style="margin-top: 20px; color: #888; font-size: 13px;">
-              ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' })}
-            </p>
-          </div>
-        `,
-      });
-    } catch (emailError) {
-      console.error('Error sending email notification:', emailError);
     }
 
     return NextResponse.json({ success: true });
