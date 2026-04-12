@@ -4,7 +4,8 @@ import { Resend } from 'resend';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendKey = process.env.RESEND_API_KEY;
+const resend = resendKey ? new Resend(resendKey) : null;
 
 const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'mozharovskyarik@gmail.com';
 
@@ -28,7 +29,9 @@ export async function POST(req: Request) {
     }
 
     // Send email notification for new lead
-    try {
+    if (!resend) {
+      console.warn('RESEND_API_KEY not set — skipping email notification');
+    } else try {
       await resend.emails.send({
         from: 'Leads <onboarding@resend.dev>',
         to: NOTIFY_EMAIL,
