@@ -33,9 +33,11 @@ export async function POST(req: Request) {
     console.log('Lead saved to Supabase');
 
     // Send email notification for new lead
+    let emailStatus = 'skipped';
     if (resend) {
       try {
-        await resend.emails.send({
+        console.log('Sending email to:', NOTIFY_EMAIL, 'resendKey exists:', !!resendKey);
+        const { data, error: emailError } = await resend.emails.send({
           from: 'Leads <onboarding@resend.dev>',
           to: [NOTIFY_EMAIL],
           subject: `🔥 ליד חדש: ${answers.name}`,
@@ -74,15 +76,24 @@ export async function POST(req: Request) {
             </div>
           `,
         });
-        console.log('Email notification sent');
-      } catch (emailError) {
-        console.error('Resend email error:', emailError);
+
+        if (emailError) {
+          console.error('Resend API error:', JSON.stringify(emailError));
+          emailStatus = `error: ${JSON.stringify(emailError)}`;
+        } else {
+          console.log('Email sent successfully, id:', data?.id);
+          emailStatus = `sent: ${data?.id}`;
+        }
+      } catch (emailError: any) {
+        console.error('Resend exception:', emailError?.message || emailError);
+        emailStatus = `exception: ${emailError?.message}`;
       }
     } else {
       console.warn('RESEND_API_KEY not set — skipping email notification');
+      emailStatus = 'no_api_key';
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, emailStatus });
   } catch (error: any) {
     console.error('Submit error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
