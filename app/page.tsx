@@ -1,337 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Check, Clock, Sun, Moon } from "lucide-react";
-import Cal, { getCalApi } from "@calcom/embed-react";
+import { useState, useEffect, useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { Check, Sun, Moon, ArrowDown, Send } from "lucide-react";
 
-type Question = {
-  id: string;
-  type:
-    | "text"
-    | "email"
-    | "phone"
-    | "textarea"
-    | "choice"
-    | "multi-choice"
-    | "calendar";
-  question: string;
-  questionHe: string;
-  questionHeMale?: string;
-  questionHeFemale?: string;
-  placeholder?: string;
-  placeholderHe?: string;
-  placeholderHeMale?: string;
-  placeholderHeFemale?: string;
-  options?: string[];
-  optionsHe?: string[];
-  optionsFemale?: string[];
-  optionsFemaleHe?: string[];
-  optionsHeMale?: string[];
-  optionsHeFemale?: string[];
-  hideDescription?: boolean;
-  description?: string;
-  descriptionHe?: string;
-  noAutoAdvance?: boolean;
-  multiChoiceNote?: string;
-  multiChoiceNoteHe?: string;
-};
-
-const questions: Question[] = [
-  {
-    id: "name",
-    type: "text",
-    question: "Name",
-    questionHe: "שם",
-    placeholder: "Type your answer here...",
-    placeholderHe: "הקלד את התשובה שלך כאן...",
-    hideDescription: true,
-  },
-  {
-    id: "age",
-    type: "choice",
-    question: "Age",
-    questionHe: "גיל",
-    options: ["Under 18", "18-24", "25-34", "35-44", "45+"],
-    optionsHe: ["מתחת ל-18", "18-24", "25-34", "35-44", "45+"],
-    hideDescription: true,
-  },
-  {
-    id: "gender",
-    type: "choice",
-    question: "Gender",
-    questionHe: "מגדר",
-    options: ["Male", "Female"],
-    optionsHe: ["זכר", "נקבה"],
-    hideDescription: true,
-  },
-  {
-    id: "phone",
-    type: "phone",
-    question: "What's your phone number?",
-    questionHe: "מה מספר הפלאפון שלך?",
-    questionHeMale: "מה מספר הפלאפון שלך?",
-    questionHeFemale: "מה מספר הפלאפון שלך?",
-    placeholder: "555-0123",
-    placeholderHe: "50-123-4567",
-    hideDescription: true,
-  },
-  {
-    id: "why_now",
-    type: "multi-choice",
-    question: "What made you reach out now?",
-    questionHe: "מה גרם לך לפנות עכשיו?",
-    options: [
-      "Something changed in my life",
-      "I'm tired of my current situation",
-      "I want to improve my performance",
-      "Health / doctor's recommendation",
-      "Wedding / upcoming event",
-    ],
-    optionsHe: [
-      "משהו השתנה בחיים שלי",
-      "נמאס לי מהמצב",
-      "רוצה לשפר ביצועים",
-      "בריאות / המלצת רופא",
-      "חתונה / אירוע קרוב",
-    ],
-    hideDescription: true,
-    multiChoiceNote: "Select all that apply",
-    multiChoiceNoteHe: "ניתן לבחור יותר מאחד",
-  },
-  {
-    id: "real_reason",
-    type: "textarea",
-    question: "If you're being honest with yourself — what's the real reason you're here?",
-    questionHe: "אם את/ה כנה עם עצמך — מה הסיבה האמיתית שאת/ה כאן?",
-    questionHeMale: "אם אתה כנה עם עצמך — מה הסיבה האמיתית שאתה כאן?",
-    questionHeFemale: "אם את כנה עם עצמך — מה הסיבה האמיתית שאת כאן?",
-    placeholder: "Type your answer here...",
-    placeholderHe: "הקלד את התשובה שלך כאן...",
-    placeholderHeMale: "הקלד את התשובה שלך כאן...",
-    placeholderHeFemale: "הקלידי את התשובה שלך כאן...",
-    hideDescription: true,
-  },
-  {
-    id: "main_goal",
-    type: "multi-choice",
-    question: "What's your main goal?",
-    questionHe: "מה המטרה העיקרית שלך?",
-    options: [
-      "Build muscle & get bigger",
-      "Lose fat & get lean",
-      "Nutrition",
-      "Get stronger & more athletic (running/hybrid)",
-      "Mental",
-    ],
-    optionsHe: [
-      "בניית שרירים וגדילה",
-      "שריפת שומן והרזיה",
-      "תזונה",
-      "להתחזק ולהיות אתלטי יותר (ריצות/היבריד)",
-      "מנטלי",
-    ],
-    // Female-specific options
-    optionsFemale: [
-      "Tone & strengthen glutes",
-      "Lose fat & get lean",
-      "Nutrition",
-      "Improve flexibility & balance",
-      "Mental",
-    ],
-    optionsFemaleHe: [
-      "חיטוב ומיצוק הישבן",
-      "שריפת שומן והרזיה",
-      "תזונה",
-      "שיפור גמישות ושיווי משקל",
-      "מנטלי",
-    ],
-    hideDescription: true,
-    multiChoiceNote: "Select all that apply",
-    multiChoiceNoteHe: "ניתן לבחור יותר מאחד",
-  },
-  {
-    id: "main_blocker",
-    type: "choice",
-    question: "What's the biggest thing holding you back?",
-    questionHe: "מה הדבר הכי גדול שמעכב אותך?",
-    options: [
-      "No time",
-      "Lack of motivation",
-      "Don't know where to start",
-      "Inconsistent nutrition",
-      "Keep falling off track",
-    ],
-    optionsHe: [
-      "אין לי זמן",
-      "חוסר מוטיבציה",
-      "לא יודע מאיפה להתחיל",
-      "תזונה לא מסודרת",
-      "נפילות חוזרות",
-    ],
-    hideDescription: true,
-  },
-  {
-    id: "training_experience",
-    type: "choice",
-    question: "What's your current training experience?",
-    questionHe: "מה ניסיון האימון הנוכחי שלך?",
-    questionHeMale: "מה ניסיון האימון הנוכחי שלך?",
-    questionHeFemale: "מה ניסיון האימון הנוכחי שלך?",
-    options: [
-      "Complete beginner (0-6 months)",
-      "Intermediate (6 months-2 years)",
-      "Advanced (2+ years)",
-    ],
-    optionsHe: [
-      "מתחיל לחלוטין (0-6 חודשים)",
-      "בינוני (6 חודשים-2 שנים)",
-      "מתקדם (2+ שנים)",
-    ],
-    optionsHeMale: [
-      "מתחיל לחלוטין (0-6 חודשים)",
-      "בינוני (6 חודשים-2 שנים)",
-      "מתקדם (2+ שנים)",
-    ],
-    optionsHeFemale: [
-      "מתחילה לחלוטין (0-6 חודשים)",
-      "בינונית (6 חודשים-2 שנים)",
-      "מתקדמת (2+ שנים)",
-    ],
-    hideDescription: true,
-  },
-  {
-    id: "training_days",
-    type: "choice",
-    question: "How many days per week can you train?",
-    questionHe: "כמה ימים בשבוע אתה יכול להתאמן?",
-    questionHeMale: "כמה ימים בשבוע אתה יכול להתאמן?",
-    questionHeFemale: "כמה ימים בשבוע את יכולה להתאמן?",
-    options: ["2", "3", "4", "5", "6+"],
-    optionsHe: ["2", "3", "4", "5", "6+"],
-    hideDescription: true,
-  },
-  {
-    id: "injuries",
-    type: "textarea",
-    question: "Do you have any injuries or physical limitations?",
-    questionHe: "האם יש לך פציעות או מגבלות פיזיות?",
-    questionHeMale: "האם יש לך פציעות או מגבלות פיזיות?",
-    questionHeFemale: "האם יש לך פציעות או מגבלות פיזיות?",
-    placeholder: "Type your answer here...",
-    placeholderHe: "הקלד את התשובה שלך כאן...",
-    placeholderHeMale: "הקלד את התשובה שלך כאן...",
-    placeholderHeFemale: "הקלידי את התשובה שלך כאן...",
-    hideDescription: true,
-  },
-  {
-    id: "tried_before",
-    type: "textarea",
-    question: "What have you tried before that didn't work?",
-    questionHe: "מה ניסית בעבר שלא עבד?",
-    questionHeMale: "מה ניסית בעבר שלא עבד?",
-    questionHeFemale: "מה ניסית בעבר שלא עבד?",
-    placeholder: "Type your answer here...",
-    placeholderHe: "הקלד את התשובה שלך כאן...",
-    placeholderHeMale: "הקלד את התשובה שלך כאן...",
-    placeholderHeFemale: "הקלידי את התשובה שלך כאן...",
-    hideDescription: true,
-  },
-  {
-    id: "format_preference",
-    type: "choice",
-    question: "What works best for you?",
-    questionHe: "מה מתאים לך יותר?",
-    questionHeMale: "מה מתאים לך יותר?",
-    questionHeFemale: "מה מתאים לך יותר?",
-    options: [
-      "Personal 1:1 coaching with Arik",
-      "Workout program / meal plan from my experience — things that actually worked on me and others over the years",
-      "Not sure yet",
-    ],
-    optionsHe: [
-      "ליווי אישי 1:1 עם אריק",
-      "תוכנית אימונים / תפריט תזונה מהניסיון שלי — דברים שאשכרה עבדו עלי ועל אחרים לאורך השנים",
-      "עדיין לא יודע",
-    ],
-    optionsHeMale: [
-      "ליווי אישי 1:1 עם אריק",
-      "תוכנית אימונים / תפריט תזונה מהניסיון שלי — דברים שאשכרה עבדו עלי ועל אחרים לאורך השנים",
-      "עדיין לא יודע",
-    ],
-    optionsHeFemale: [
-      "ליווי אישי 1:1 עם אריק",
-      "תוכנית אימונים / תפריט תזונה מהניסיון שלי — דברים שאשכרה עבדו עלי ועל אחרים לאורך השנים",
-      "עדיין לא יודעת",
-    ],
-    hideDescription: true,
-  },
-  {
-    id: "investment",
-    type: "choice",
-    question:
-      "My 1-on-1 coaching starts at $197/mo. Are you ready to invest in yourself?",
-    questionHe:
-      "הליווי האישי שלי מתחיל מ-₪730 לחודש. האם אתה מוכן להשקיע בעצמך?",
-    questionHeMale:
-      "הליווי האישי שלי מתחיל מ-₪730 לחודש. האם אתה מוכן להשקיע בעצמך?",
-    questionHeFemale:
-      "הליווי האישי שלי מתחיל מ-₪730 לחודש. האם את מוכנה להשקיע בעצמך?",
-    options: [
-      "Yes, I'm ready to start",
-      "I need more information first",
-      "The price is out of my budget",
-    ],
-    optionsHe: [
-      "כן, אני מוכן להתחיל",
-      "אני צריך יותר מידע קודם",
-      "המחיר מחוץ לתקציב שלי",
-    ],
-    optionsHeMale: [
-      "כן, אני מוכן להתחיל",
-      "אני צריך יותר מידע קודם",
-      "המחיר מחוץ לתקציב שלי",
-    ],
-    optionsHeFemale: [
-      "כן, אני מוכנה להתחיל",
-      "אני צריכה יותר מידע קודם",
-      "המחיר מחוץ לתקציב שלי",
-    ],
-    hideDescription: true,
-  },
-  {
-    id: "email",
-    type: "email",
-    question: "Leave your best email:",
-    questionHe: "השאר את האימייל הטוב ביותר שלך:",
-    placeholder: "name@example.com",
-    placeholderHe: "שם@דוגמה.com",
-    hideDescription: true,
-  },
-  {
-    id: "consultation_booking",
-    type: "calendar",
-    question: "Great! Let's schedule an initial consultation call:",
-    questionHe: "מעולה! בואו נקבע שיחת ייעוץ ראשונית:",
-    hideDescription: true,
-  },
-];
+function FadeIn({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 30 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function Home() {
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [currentAnswer, setCurrentAnswer] = useState("");
-  const [multiChoices, setMultiChoices] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
   const [lang, setLang] = useState<"en" | "he">("he");
-  const [calendarBooked, setCalendarBooked] = useState(false);
-  const [validationError, setValidationError] = useState("");
-  const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [mounted, setMounted] = useState(false);
 
-  // Detect system theme + prevent hydration mismatch
+  // Form state
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [goal, setGoal] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [validationError, setValidationError] = useState("");
+
+  const formRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     setMounted(true);
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -342,272 +46,118 @@ export default function Home() {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
-  const currentQuestion = questions[currentStep];
-  const progress = ((currentStep + 1) / questions.length) * 100;
+  const isHe = lang === "he";
+  const dir = mounted ? (isHe ? "rtl" : "ltr") : undefined;
 
-  const phonePrefix = lang === "he" ? "+972 " : "+1 ";
+  const scrollToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-  const getPhoneDefault = () => phonePrefix;
-
-  // Initialize Cal.com and listen for booking events
-  useEffect(() => {
-    if (currentQuestion?.type === "calendar") {
-      (async function () {
-        const cal = await getCalApi({ namespace: "arik-moz-1-1" });
-
-        // Configure UI with week view and theme
-        cal("ui", {
-          theme: theme,
-          cssVarsPerTheme: {
-            light: {
-              "cal-brand": "#E05A00",
-            },
-            dark: {
-              "cal-brand": "#E05A00",
-            },
-          },
-          hideEventTypeDetails: false,
-          layout: "week_view",
-        });
-
-        // Listen for booking success
-        cal("on", {
-          action: "bookingSuccessful",
-          callback: async (e: any) => {
-            console.log("Booking successful!", e.detail);
-            setCalendarBooked(true);
-
-            // Store booking info
-            const bookingData = {
-              ...answers,
-              consultation_booking: `Booked: ${e.detail.data.date}`,
-            };
-            setAnswers(bookingData);
-
-            // Submit to database
-            try {
-              await fetch("/api/submit", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(bookingData),
-              });
-            } catch (error) {
-              console.error("Error submitting booking:", error);
-            }
-          },
-        });
-      })();
-    }
-  }, [currentQuestion?.type, currentStep, answers, theme]);
-
-  const handleNext = async () => {
-    // Clear previous validation errors
+  const handleSubmit = async () => {
     setValidationError("");
 
-    // Check if answer is required (only question 12 is optional)
-    const isOptional = !currentQuestion.hideDescription;
-
-    // For multi-choice, check if at least one option is selected
-    if (currentQuestion.type === "multi-choice") {
-      if (multiChoices.length === 0 && !isOptional) return;
-    } else if (
-      !currentAnswer.trim() &&
-      currentQuestion.type !== "choice" &&
-      !isOptional
-    ) {
+    if (!name.trim()) {
+      setValidationError(isHe ? "אנא הזן שם" : "Please enter your name");
+      return;
+    }
+    const digitsOnly = phone.replace(/[^\d]/g, "");
+    if (digitsOnly.length < 9) {
+      setValidationError(isHe ? "אנא הזן מספר טלפון תקין" : "Please enter a valid phone number");
       return;
     }
 
-    // Validate phone number (step 4)
-    if (currentQuestion.type === "phone") {
-      const digitsOnly = currentAnswer.replace(/[^\d]/g, "");
-      if (!/^[+\d][\d\s\-]*$/.test(currentAnswer) || digitsOnly.length < 9) {
-        setValidationError(
-          lang === "he"
-            ? "אנא הזן מספר טלפון תקין"
-            : "Please enter a valid phone number",
-        );
-        return;
-      }
-    }
-
-    // Validate email (step 13)
-    if (currentQuestion.type === "email") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(currentAnswer)) {
-        setValidationError(
-          lang === "he"
-            ? "אנא הזן כתובת אימייל תקינה"
-            : "Please enter a valid email address",
-        );
-        return;
-      }
-    }
-
-    // Store current answer before moving
-    const answerValue =
-      currentQuestion.type === "multi-choice"
-        ? multiChoices.join(", ")
-        : currentAnswer;
-    const newAnswers = {
-      ...answers,
-      [currentQuestion.id]: answerValue,
-    };
-    setAnswers(newAnswers);
-
-    // Check if the next step is the calendar (optional) — submit lead now
-    const nextQuestion = currentStep < questions.length - 1 ? questions[currentStep + 1] : null;
-    if (nextQuestion?.type === "calendar") {
-      // Submit lead to Supabase BEFORE showing calendar
-      try {
-        await fetch("/api/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newAnswers),
-        });
-      } catch (error) {
-        console.error("Error submitting lead:", error);
-      }
-      // Advance to calendar step
-      setCurrentStep(currentStep + 1);
-      setCurrentAnswer("");
-      setMultiChoices([]);
-      return;
-    }
-
-    if (currentStep < questions.length - 1) {
-      setCurrentStep(currentStep + 1);
-      const next = questions[currentStep + 1];
-      const nextAnswer = newAnswers[next.id] || "";
-      setCurrentAnswer(
-        next.type === "phone" && !nextAnswer ? getPhoneDefault() : nextAnswer
-      );
-
-      // If next question is multi-choice, parse the stored answer
-      if (next.type === "multi-choice") {
-        setMultiChoices(nextAnswer ? nextAnswer.split(", ") : []);
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, email: email || undefined, goal }),
+      });
+      if (response.ok) {
+        setIsSubmitted(true);
       } else {
-        setMultiChoices([]);
+        alert(isHe ? "שגיאה בשליחת הטופס" : "Error submitting form");
       }
-    } else {
-      // Submit form (fallback — shouldn't reach here with calendar as last)
-      setIsSubmitting(true);
-      try {
-        const response = await fetch("/api/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newAnswers),
-        });
-
-        if (response.ok) {
-          setIsComplete(true);
-        } else {
-          alert(lang === "he" ? "שגיאה בשליחת הטופס" : "Error submitting form");
-        }
-      } catch (error) {
-        console.error(error);
-        alert(lang === "he" ? "שגיאה בשליחת הטופס" : "Error submitting form");
-      } finally {
-        setIsSubmitting(false);
-      }
+    } catch {
+      alert(isHe ? "שגיאה בשליחת הטופס" : "Error submitting form");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleChoice = (choice: string) => {
-    setCurrentAnswer(choice);
-    // Store the answer immediately
-    const newAnswers = {
-      ...answers,
-      [currentQuestion.id]: choice,
-    };
-    setAnswers(newAnswers);
+  return (
+    <div className="min-h-screen bg-[var(--bg-page)] font-mono" dir={dir}>
+      {/* Top bar */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-[var(--bg-page)]/80 backdrop-blur-sm">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setLang(isHe ? "en" : "he")}
+            className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] underline cursor-pointer"
+          >
+            {isHe ? "EN" : "עב"}
+          </button>
+          <button
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            className="p-1.5 rounded-full text-[var(--text-muted)] hover:text-[var(--brand-orange)] transition-colors cursor-pointer"
+          >
+            {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
+        </div>
+        <button
+          onClick={scrollToForm}
+          className="px-4 py-1.5 bg-[var(--brand-orange)] text-[#F5F4F0] rounded text-xs font-bold hover:bg-[var(--brand-orange-light)] transition-colors cursor-pointer"
+        >
+          {isHe ? "השאר פרטים" : "Get Started"}
+        </button>
+      </div>
 
-    // Check if this question was already answered (user came back)
-    const wasAlreadyAnswered =
-      answers[currentQuestion.id] !== undefined &&
-      answers[currentQuestion.id] !== "";
-
-    // Only auto-advance if this is the first time answering
-    if (!wasAlreadyAnswered) {
-      setTimeout(() => {
-        if (currentStep < questions.length - 1) {
-          setCurrentStep(currentStep + 1);
-          setCurrentAnswer(newAnswers[questions[currentStep + 1].id] || "");
-        } else {
-          // Last question - submit
-          handleNext();
-        }
-      }, 300);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && currentQuestion.type !== "textarea") {
-      e.preventDefault();
-      handleNext();
-    }
-  };
-
-  const handleBack = () => {
-    setValidationError("");
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-      const prevQuestion = questions[currentStep - 1];
-      const prevAnswer = answers[prevQuestion.id] || "";
-      setCurrentAnswer(
-        prevQuestion.type === "phone" && !prevAnswer ? getPhoneDefault() : prevAnswer
-      );
-
-      // If previous question is multi-choice, parse the stored answer
-      if (prevQuestion.type === "multi-choice") {
-        setMultiChoices(prevAnswer ? prevAnswer.split(", ") : []);
-      } else {
-        setMultiChoices([]);
-      }
-    } else {
-      // If on first question, go back to welcome screen
-      setShowWelcome(true);
-    }
-  };
-
-  const handleMultiChoiceToggle = (option: string) => {
-    if (multiChoices.includes(option)) {
-      setMultiChoices(multiChoices.filter((c) => c !== option));
-    } else {
-      setMultiChoices([...multiChoices, option]);
-    }
-  };
-
-  // Welcome Screen
-  if (showWelcome) {
-    return (
-      <div
-        className="min-h-screen bg-[var(--bg-page)] flex flex-col items-center justify-center p-4 font-mono"
-        dir={mounted ? (lang === "he" ? "rtl" : "ltr") : undefined}
-      >
+      {/* ===== HERO ===== */}
+      <section className="min-h-screen flex flex-col items-center justify-center px-6 pt-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full"
+          transition={{ duration: 0.8 }}
+          className="max-w-xl w-full text-center"
         >
-          {/* Title + Description */}
-          <div className="text-center mb-6">
-            <h1 className="text-2xl text-[var(--text-primary)] mb-2 font-bold">
-              {lang === "he" ? "הצעד הראשון שלך מתחיל כאן" : "Your first step starts here"}
-            </h1>
-            <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-              {lang === "he"
-                ? "הטופס הזה נועד לעזור לי ולך כמה שיותר."
-                : "This form is designed to help me and you as much as possible."}
+          <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] leading-tight mb-8">
+            {isHe
+              ? "הגעת לפה כי משהו עד עכשיו לא עבד."
+              : "You're here because something hasn't worked until now."}
+          </h1>
+
+          <div className="text-base md:text-lg text-[var(--text-muted)] leading-relaxed space-y-2">
+            <p>{isHe ? "אולי ירדת במשקל — וחזרת." : "Maybe you lost weight — and gained it back."}</p>
+            <p>{isHe ? "אולי התחלת — ועצרת." : "Maybe you started — and stopped."}</p>
+            <p>{isHe ? "אולי אתה מתאמן כבר שנים ועדיין לא שם." : "Maybe you've been training for years and still aren't there."}</p>
+          </div>
+
+          <div className="mt-10 text-base md:text-lg text-[var(--text-primary)] leading-relaxed space-y-1">
+            <p>{isHe ? "זה לא בגלל שאתה חלש." : "It's not because you're weak."}</p>
+            <p className="text-[var(--brand-orange)] font-semibold">
+              {isHe
+                ? "זה בגלל שאף אחד לא בנה לך תוכנית שמתאימה לך — ולחיים שיש לך."
+                : "It's because no one built you a plan that fits you — and the life you have."}
             </p>
           </div>
 
-          {/* IG-style Bio Section */}
-          <div className="bg-[var(--bg-card)] rounded-2xl p-6 mb-8" style={{ border: "1px solid var(--border-color)" }}>
-            {/* Avatar + Name row */}
-            <div className="flex items-center gap-4 mb-4" dir={lang === "he" ? "rtl" : "ltr"}>
+          <motion.button
+            onClick={scrollToForm}
+            className="mt-12 text-[var(--text-muted)] hover:text-[var(--brand-orange)] transition-colors cursor-pointer"
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+          >
+            <ArrowDown size={28} />
+          </motion.button>
+        </motion.div>
+      </section>
+
+      {/* ===== ABOUT ===== */}
+      <section className="py-20 px-6">
+        <div className="max-w-xl mx-auto">
+          <FadeIn>
+            <div className="flex items-center gap-4 mb-8" dir={isHe ? "rtl" : "ltr"}>
               <div
-                className="w-16 h-16 rounded-full flex-shrink-0 p-[2.5px]"
+                className="w-20 h-20 rounded-full flex-shrink-0 p-[3px]"
                 style={{ background: "linear-gradient(135deg, var(--brand-orange), var(--brand-orange-light))" }}
               >
                 <div className="w-full h-full rounded-full overflow-hidden">
@@ -619,495 +169,237 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <div className={lang === "he" ? "text-right" : "text-left"}>
-                <div className="text-base font-bold text-[var(--text-primary)]">Arik</div>
-                <div className="text-sm text-[var(--text-muted)]">@arik.moz</div>
+              <div className={isHe ? "text-right" : "text-left"}>
+                <div className="text-xl font-bold text-[var(--text-primary)]">
+                  {isHe ? "אני אריק." : "I'm Arik."}
+                </div>
+                <div className="text-sm text-[var(--text-muted)]">
+                  {isHe ? "+15 שנים של ניסיון בכושר, תזונה ובריאות 💪🏼" : "15+ years of experience in fitness, nutrition & health 💪🏼"}
+                </div>
               </div>
             </div>
+          </FadeIn>
 
-            {/* Bio text */}
-            <div className={`text-sm text-[var(--text-primary)] leading-relaxed ${lang === "he" ? "text-right" : "text-left"}`} dir={lang === "he" ? "rtl" : "ltr"}>
-              <p>{lang === "he" ? "15+ שנים של ניסיון בכושר, תזונה ובריאות 💪🏼" : "15+ years of experience in fitness, nutrition & health 💪🏼"}</p>
-              <p className="mt-2">
-                {lang === "he" ? "אני לא מוכר לך 90 יום של מוטיבציה" : "I'm not selling you 90 days of motivation"}
-              </p>
-              <p className="text-[var(--brand-orange)] font-semibold">
-                {lang === "he" ? "אני עוזר לך לבנות אורח חיים שישאר איתך לתמיד" : "I help you build a lifestyle that stays with you forever"}
-              </p>
-              <p className="text-[var(--text-muted)] mt-2">
-                {lang === "he" ? "מלאו את הטופס — ואחזור אליכם אישית ⬇️" : "Fill out the form — and I'll get back to you personally ⬇️"}
+          <FadeIn delay={0.15}>
+            <div className="text-base md:text-lg text-[var(--text-primary)] leading-relaxed space-y-3">
+              <p>{isHe ? "אני לא בונה גוף תוצאה לרגע." : "I don't build bodies for a moment."}</p>
+              <p className="font-semibold">
+                {isHe ? "אני בונה גוף תוצאה שנשאר איתך לעבוד בעוד 20 שנה." : "I build bodies that still work in 20 years."}
               </p>
             </div>
-          </div>
+          </FadeIn>
 
-          {/* CTA Section */}
-          <div className="text-center">
-          <div className="flex flex-col gap-4 items-center justify-center mb-8">
-            {lang === "he" ? (
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    setShowWelcome(false);
-                    setLang("he");
-                  }}
-                  className="px-8 py-3 bg-[var(--brand-orange)] text-[#F5F4F0] rounded font-bold text-base hover:bg-[var(--brand-orange-light)] transition-colors cursor-pointer"
-                >
-                  התחל עכשיו
-                </button>
-                <span className="text-sm text-[var(--text-primary)]">
-                  לחץ <strong>Enter ↵</strong>
-                </span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    setShowWelcome(false);
-                    setLang("en");
-                  }}
-                  className="px-8 py-3 bg-[var(--brand-orange)] text-[#F5F4F0] rounded font-bold text-base hover:bg-[var(--brand-orange-light)] transition-colors cursor-pointer"
-                >
-                  Start Now
-                </button>
-                <span className="text-sm text-[var(--text-primary)]">
-                  press <strong>Enter ↵</strong>
-                </span>
-              </div>
-            )}
-          </div>
-
-          <p className="text-[var(--text-muted)] text-sm flex items-center justify-center gap-2">
-            <Clock size={16} />
-            {lang === "he" ? "לוקח 3-5 דקות" : "Takes 3-5 minutes"}
-          </p>
-
-          <div className="mt-6 flex items-center justify-center gap-4">
-            <button
-              onClick={() => setLang(lang === "he" ? "en" : "he")}
-              className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] underline cursor-pointer"
-            >
-              {lang === "he" ? "English" : "עברית"}
-            </button>
-            <button
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-              className="p-2 rounded-full text-[var(--text-muted)] hover:text-[var(--brand-orange)] transition-colors cursor-pointer"
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-            </button>
-          </div>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  // Success Screen
-  if (isComplete) {
-    return (
-      <div
-        className="min-h-screen bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center p-4 font-mono"
-        dir={mounted ? (lang === "he" ? "rtl" : "ltr") : undefined}
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="text-center text-white"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-8"
-          >
-            <Check size={48} className="text-green-500" />
-          </motion.div>
-          <h1 className="text-3xl mb-4 font-bold">
-            {lang === "he" ? "תודה רבה!" : "Thank you!"}
-          </h1>
-          <p className="text-lg mb-8">
-            {calendarBooked
-              ? lang === "he"
-                ? "הפגישה נקבעה בהצלחה! נתראה בקרוב."
-                : "Consultation booked successfully! See you soon."
-              : lang === "he"
-                ? "אחזור אליך אישית בהקדם."
-                : "I'll get back to you personally."}
-          </p>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2 }}
-          >
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-white/20 text-white rounded font-bold text-base hover:bg-white/30 transition-colors cursor-pointer backdrop-blur-sm"
-            >
-              {lang === "he" ? "חזרה למסך הבית" : "Back to home"}
-            </button>
-          </motion.div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  // Determine gender for language customization
-  const isFemale = answers.gender === "Female" || answers.gender === "נקבה";
-
-  // Display question based on gender and language
-  const displayQuestion = (() => {
-    if (lang === "he") {
-      if (isFemale && currentQuestion.questionHeFemale) {
-        return currentQuestion.questionHeFemale;
-      } else if (!isFemale && currentQuestion.questionHeMale) {
-        return currentQuestion.questionHeMale;
-      }
-      return currentQuestion.questionHe;
-    }
-    return currentQuestion.question;
-  })();
-
-  // Use gender-specific options if they exist
-  const displayOptions = (() => {
-    if (lang === "he") {
-      if (isFemale && currentQuestion.optionsHeFemale) {
-        return currentQuestion.optionsHeFemale;
-      } else if (!isFemale && currentQuestion.optionsHeMale) {
-        return currentQuestion.optionsHeMale;
-      }
-      return currentQuestion.optionsHe;
-    }
-    // For English, only female-specific options exist for main_goal
-    if (isFemale && currentQuestion.optionsFemale) {
-      return currentQuestion.optionsFemale;
-    }
-    return currentQuestion.options;
-  })();
-
-  // Display placeholder based on gender and language
-  const displayPlaceholder = (() => {
-    if (lang === "he") {
-      if (isFemale && currentQuestion.placeholderHeFemale) {
-        return currentQuestion.placeholderHeFemale;
-      } else if (!isFemale && currentQuestion.placeholderHeMale) {
-        return currentQuestion.placeholderHeMale;
-      }
-      return currentQuestion.placeholderHe;
-    }
-    return currentQuestion.placeholder;
-  })();
-
-  // Question Screen
-  return (
-    <div
-      className="min-h-screen bg-[var(--bg-page)] flex flex-col font-mono relative"
-      dir={mounted ? (lang === "he" ? "rtl" : "ltr") : undefined}
-    >
-      {/* Theme toggle */}
-      <div className="absolute top-3 right-3 z-10">
-        <button
-          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-          className="p-2 rounded-full text-[var(--text-muted)] hover:text-[var(--brand-orange)] transition-colors cursor-pointer"
-          aria-label="Toggle theme"
-        >
-          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-        </button>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="w-full h-1 bg-[var(--border-color)]">
-        <motion.div
-          className="h-full bg-[var(--brand-orange)]"
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.3 }}
-        />
-      </div>
-
-      {/* Question */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-2xl">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Back Button */}
-              <button
-                onClick={handleBack}
-                className="mb-6 text-[var(--text-muted)] hover:text-[var(--text-primary)] text-sm cursor-pointer transition-colors"
-              >
-                {lang === "he" ? "→ חזור אחורה" : "← Go back"}
-              </button>
-
-              {/* Question number and title */}
-              <div className="mb-4">
-                <span className="text-base text-[var(--text-primary)] font-bold">
-                  {currentStep + 1}. {displayQuestion}
-                </span>
-              </div>
-
-              {/* Description (optional) */}
-              {!currentQuestion.hideDescription && (
-                <p className="text-sm text-[var(--text-muted)] italic mb-8">
-                  {lang === "he"
-                    ? currentQuestion.descriptionHe || "תיאור (אופציונלי)"
-                    : currentQuestion.description || "Description (optional)"}
-                </p>
-              )}
-
-              {/* Multi-choice note */}
-              {currentQuestion.type === "multi-choice" &&
-                (currentQuestion.multiChoiceNote ||
-                  currentQuestion.multiChoiceNoteHe) && (
-                  <p className="text-sm text-[var(--text-muted)] italic mb-4">
-                    {lang === "he"
-                      ? currentQuestion.multiChoiceNoteHe
-                      : currentQuestion.multiChoiceNote}
-                  </p>
-                )}
-
-              {currentQuestion.type === "choice" ? (
-                <div className="space-y-3" dir="ltr">
-                  {displayOptions?.map((option, index) => {
-                    const isSelected = currentAnswer === option;
-                    const wasAlreadyAnswered =
-                      answers[currentQuestion.id] !== undefined &&
-                      answers[currentQuestion.id] !== "";
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleChoice(option)}
-                        className={`w-full text-left px-5 py-3 bg-[var(--bg-card)] border rounded transition-all text-base group cursor-pointer ${
-                          isSelected && wasAlreadyAnswered
-                            ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 text-[var(--text-primary)]"
-                            : "border-[var(--border-color)] hover:border-[var(--brand-orange)] hover:bg-[var(--brand-orange)]/5 text-[var(--text-primary)]"
-                        }`}
-                      >
-                        <span
-                          className={`mr-3 text-sm ${isSelected && wasAlreadyAnswered ? "text-[var(--brand-orange)]" : "text-[var(--text-muted)] group-hover:text-[var(--brand-orange)]"}`}
-                        >
-                          {isSelected && wasAlreadyAnswered
-                            ? "✓"
-                            : String.fromCharCode(65 + index)}
-                        </span>
-                        {option}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : currentQuestion.type === "multi-choice" ? (
-                <div className="space-y-3" dir="ltr">
-                  {displayOptions?.map((option, index) => {
-                    const isSelected = multiChoices.includes(option);
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleMultiChoiceToggle(option)}
-                        className={`w-full text-left px-5 py-3 bg-[var(--bg-card)] border rounded transition-all text-base group cursor-pointer ${
-                          isSelected
-                            ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10"
-                            : "border-[var(--border-color)] hover:border-[var(--brand-orange)] hover:bg-[var(--brand-orange)]/5"
-                        }`}
-                      >
-                        <span
-                          className={`mr-3 text-sm ${isSelected ? "text-[var(--brand-orange)]" : "text-[var(--text-muted)] group-hover:text-[var(--brand-orange)]"}`}
-                        >
-                          {isSelected ? "✓" : String.fromCharCode(65 + index)}
-                        </span>
-                        <span className="text-[var(--text-primary)]">{option}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : currentQuestion.type === "calendar" ? (
-                <>
-                  {!calendarBooked && (
-                    <div className="mb-4">
-                      <button
-                        onClick={() => setIsComplete(true)}
-                        className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] underline cursor-pointer transition-colors"
-                      >
-                        {lang === "he" ? "דלג ←" : "Skip →"}
-                      </button>
-                    </div>
-                  )}
-                  <div
-                    className="w-full bg-[var(--bg-card)] rounded-lg p-4 shadow-lg"
-                    style={{ minHeight: "500px" }}
-                  >
-                    <Cal
-                      namespace="arik-moz-1-1"
-                      calLink="arik-moz/arik-moz-1-1"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        overflow: "scroll",
-                      }}
-                      config={{
-                        layout: "week_view",
-                        theme: theme,
-                        hourFormat: "24",
-                        name: answers.name || "",
-                        email: answers.email || "",
-                        phone: answers.phone || "",
-                        guests: [answers.email || ""],
-                      }}
-                    />
-                    {calendarBooked && (
-                      <div className="mt-4 p-4 text-[var(--text-primary)] rounded text-center">
-                        <div className="text-xl font-bold mb-2">
-                          {lang === "he" ? "תודה רבה!" : "Thank you!"}
-                        </div>
-                        <div className="text-base mb-4">
-                          {lang === "he"
-                            ? "הפגישה נקבעה בהצלחה, נתראה בקרוב"
-                            : "Appointment booked successfully, see you soon"}
-                        </div>
-                        <button
-                          onClick={() => window.location.reload()}
-                          className="px-6 py-3 bg-[var(--brand-orange)] text-[#F5F4F0] rounded font-bold text-base hover:bg-[var(--brand-orange-light)] transition-colors cursor-pointer "
-                        >
-                          {lang === "he"
-                            ? "חזרה למסך הבית"
-                            : "Back to home screen"}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : currentQuestion.type === "textarea" ? (
-                <>
-                  <textarea
-                    value={currentAnswer}
-                    onChange={(e) => {
-                      setCurrentAnswer(e.target.value);
-                      setValidationError("");
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleNext();
-                      }
-                    }}
-                    placeholder={displayPlaceholder}
-                    className="w-full bg-transparent border-b border-[var(--border-color)] py-2 text-[var(--text-primary)] text-lg placeholder-[var(--placeholder-color)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors resize-none"
-                    rows={1}
-                    autoFocus
-                  />
-                </>
-              ) : (
-                <>
-                  <input
-                    type={currentQuestion.type === "phone" ? "tel" : currentQuestion.type}
-                    inputMode={currentQuestion.type === "phone" ? "tel" : undefined}
-                    dir={currentQuestion.type === "phone" ? "ltr" : undefined}
-                    value={currentAnswer}
-                    onChange={(e) => {
-                      if (currentQuestion.type === "phone") {
-                        const val = e.target.value;
-                        // Only allow digits, spaces, dashes, and optional + at start
-                        if (!/^[+\d][\d\s\-]*$/.test(val) && val !== "") return;
-                        setCurrentAnswer(val);
-                      } else {
-                        setCurrentAnswer(e.target.value);
-                      }
-                      setValidationError("");
-                    }}
-                    onKeyPress={handleKeyPress}
-                    placeholder={displayPlaceholder}
-                    className={`w-full bg-transparent border-b py-2 text-[var(--text-primary)] text-lg placeholder-[var(--placeholder-color)] focus:outline-none transition-colors ${
-                      validationError
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-[var(--border-color)] focus:border-[var(--brand-orange)]"
-                    }`}
-                    autoFocus
-                  />
-                  {validationError && (
-                    <div className="mt-2 text-sm text-red-500">
-                      {validationError}
-                    </div>
-                  )}
-                </>
-              )}
-
-              {currentQuestion.type !== "choice" &&
-                currentQuestion.type !== "multi-choice" &&
-                currentQuestion.type !== "calendar" &&
-                !isSubmitting && (
-                  <div className="mt-8 text-sm text-[var(--text-primary)] hidden md:block">
-                    {lang === "he" ? (
-                      <>
-                        לחץ <strong>Enter ↵</strong>
-                      </>
-                    ) : (
-                      <>
-                        press <strong>Enter ↵</strong>
-                      </>
-                    )}
-                  </div>
-                )}
-
-              {currentQuestion.type === "textarea" && (
-                <div className="mt-4 text-xs text-[var(--text-muted)]">
-                  {lang === "he"
-                    ? "Shift + Enter ליצירת שורה חדשה"
-                    : "Shift + Enter to make a line break"}
-                </div>
-              )}
-
-              {/* Next Button - Hide for calendar and choice questions on first answer */}
-              {(() => {
-                const wasAlreadyAnswered =
-                  answers[currentQuestion.id] !== undefined &&
-                  answers[currentQuestion.id] !== "";
-                const shouldShowNextButton =
-                  currentQuestion.type !== "calendar" &&
-                  !(currentQuestion.type === "choice" && !wasAlreadyAnswered);
-
-                return (
-                  shouldShowNextButton && (
-                    <div className="mt-8">
-                      <button
-                        onClick={handleNext}
-                        disabled={
-                          isSubmitting ||
-                          (currentQuestion.type === "multi-choice" &&
-                            multiChoices.length === 0 &&
-                            currentQuestion.hideDescription !== false) ||
-                          (currentQuestion.type === "choice" &&
-                            !currentAnswer.trim() &&
-                            currentQuestion.hideDescription !== false) ||
-                          (currentQuestion.type !== "choice" &&
-                            currentQuestion.type !== "multi-choice" &&
-                            !currentAnswer.trim() &&
-                            currentQuestion.hideDescription !== false)
-                        }
-                        className="px-6 py-3 bg-[var(--brand-orange)] text-[#F5F4F0] rounded font-bold text-base hover:bg-[var(--brand-orange-light)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                      >
-                        {isSubmitting
-                          ? lang === "he"
-                            ? "שולח..."
-                            : "Submitting..."
-                          : currentStep < questions.length - 1
-                            ? lang === "he"
-                              ? "← הבא"
-                              : "Next →"
-                            : lang === "he"
-                              ? "שלח"
-                              : "Submit"}
-                      </button>
-                    </div>
-                  )
-                );
-              })()}
-            </motion.div>
-          </AnimatePresence>
+          <FadeIn delay={0.3}>
+            <div className="mt-8 text-base md:text-lg text-[var(--text-primary)] leading-relaxed">
+              <p>{isHe ? "כוח. סיבולת. תנועה. תזונה. בריאות. אריחות ימים. ראש" : "Strength. Endurance. Movement. Nutrition. Mindset."}</p>
+              <p className="text-[var(--brand-orange)] font-semibold mt-1">
+                {isHe ? "הכל ביחד — כי אף אחד מהם לא עובד לבד." : "Together — because none of them work alone."}
+              </p>
+            </div>
+          </FadeIn>
         </div>
-      </div>
+      </section>
+
+      {/* ===== WHAT YOU GET ===== */}
+      <section className="py-20 px-6 bg-[var(--bg-card)]">
+        <div className="max-w-xl mx-auto">
+          <FadeIn>
+            <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-3">
+              {isHe ? "ליווי 1 על 1 אישי" : "Personal 1-on-1 Coaching"}
+            </h2>
+            <p className="text-[var(--text-muted)] mb-10">
+              {isHe ? "לא תוכנית מהאינטרנט." : "Not a plan from the internet."}
+            </p>
+          </FadeIn>
+
+          <div className="space-y-5">
+            {[
+              {
+                he: "תוכנית אימונים שבנויה סביב החיים שלך",
+                en: "A training plan built around your life",
+              },
+              {
+                he: "תזונה שאפשר לחיות איתה — לא רק שבועיים",
+                en: "Nutrition you can live with — not just for two weeks",
+              },
+              {
+                he: "מעקב שבועי ושינויים בזמן אמת",
+                en: "Weekly tracking and real-time adjustments",
+              },
+              {
+                he: "אני זמין. לא בוט. לא PDF.",
+                en: "I'm available. Not a bot. Not a PDF.",
+              },
+            ].map((item, i) => (
+              <FadeIn key={i} delay={i * 0.1}>
+                <div className="flex items-start gap-3" dir={isHe ? "rtl" : "ltr"}>
+                  <div className="mt-0.5 w-6 h-6 rounded-full bg-[var(--brand-orange)] flex items-center justify-center flex-shrink-0">
+                    <Check size={14} className="text-white" />
+                  </div>
+                  <p className="text-base md:text-lg text-[var(--text-primary)]">
+                    {isHe ? item.he : item.en}
+                  </p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+
+          <FadeIn delay={0.5}>
+            <div className="mt-12 text-base md:text-lg text-[var(--text-primary)] leading-relaxed space-y-1">
+              <p>{isHe ? "תוך פחות מ - 90 ימים תרגיש את זה." : "Within 90 days you'll feel it."}</p>
+              <p className="text-[var(--brand-orange)] font-bold text-lg md:text-xl">
+                {isHe ? "לשארית החיים — תחיה את זה." : "For the rest of your life — you'll live it."}
+              </p>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ===== SOCIAL PROOF + CTA ===== */}
+      <section className="py-20 px-6">
+        <div className="max-w-xl mx-auto text-center">
+          <FadeIn>
+            <p className="text-base md:text-lg text-[var(--text-muted)] leading-relaxed">
+              {isHe ? "רוב הלקוחות שלי הגיעו אחרי שכבר ניסו." : "Most of my clients came after they already tried."}
+            </p>
+            <p className="text-base md:text-lg text-[var(--text-primary)] font-semibold mt-1">
+              {isHe ? "זה בדיוק הנקודה שממנה אנחנו מתחילים." : "That's exactly where we start."}
+            </p>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ===== FORM ===== */}
+      <section ref={formRef} className="py-20 px-6 bg-[var(--bg-card)]">
+        <div className="max-w-md mx-auto">
+          <FadeIn>
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-3">
+                {isHe ? "השאר פרטים" : "Leave Your Details"}
+              </h2>
+              <p className="text-[var(--text-muted)] text-sm">
+                {isHe
+                  ? "ואחזור אליך תוך 24 שעות. שיחה ראשונה — בלי עלות, בלי התחייבות."
+                  : "I'll get back to you within 24 hours. First call — free, no commitment."}
+              </p>
+            </div>
+          </FadeIn>
+
+          {isSubmitted ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-12"
+            >
+              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Check size={32} className="text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
+                {isHe ? "תודה רבה!" : "Thank you!"}
+              </h3>
+              <p className="text-[var(--text-muted)]">
+                {isHe ? "קיבלתי את הפרטים שלך, אחזור אליך בהקדם." : "Got your details, I'll get back to you soon."}
+              </p>
+            </motion.div>
+          ) : (
+            <FadeIn delay={0.15}>
+              <div className="space-y-5" dir={isHe ? "rtl" : "ltr"}>
+                <div>
+                  <label className="block text-sm text-[var(--text-muted)] mb-1.5">
+                    {isHe ? "שם" : "Name"}
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => { setName(e.target.value); setValidationError(""); }}
+                    placeholder={isHe ? "השם שלך" : "Your name"}
+                    className="w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] placeholder-[var(--placeholder-color)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[var(--text-muted)] mb-1.5">
+                    {isHe ? "טלפון" : "Phone"}
+                  </label>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    dir="ltr"
+                    value={phone}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (!/^[+\d][\d\s\-]*$/.test(val) && val !== "") return;
+                      setPhone(val);
+                      setValidationError("");
+                    }}
+                    placeholder={isHe ? "050-123-4567" : "555-0123"}
+                    className="w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] placeholder-[var(--placeholder-color)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[var(--text-muted)] mb-1.5">
+                    {isHe ? "אימייל" : "Email"}{" "}
+                    <span className="text-[var(--placeholder-color)]">({isHe ? "לא חובה" : "optional"})</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setValidationError(""); }}
+                    placeholder={isHe ? "name@example.com" : "name@example.com"}
+                    dir="ltr"
+                    className="w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] placeholder-[var(--placeholder-color)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[var(--text-muted)] mb-1.5">
+                    {isHe ? "מה המטרה שלך?" : "What's your goal?"}
+                  </label>
+                  <select
+                    value={goal}
+                    onChange={(e) => { setGoal(e.target.value); setValidationError(""); }}
+                    className="w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors cursor-pointer appearance-none"
+                    style={{ backgroundImage: "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e\")", backgroundRepeat: "no-repeat", backgroundPosition: isHe ? "left 12px center" : "right 12px center", backgroundSize: "16px" }}
+                  >
+                    <option value="" disabled>{isHe ? "בחר מטרה..." : "Choose a goal..."}</option>
+                    <option value={isHe ? "ירידה במשקל / שריפת שומן" : "Weight loss / fat burn"}>{isHe ? "ירידה במשקל / שריפת שומן" : "Weight loss / fat burn"}</option>
+                    <option value={isHe ? "בניית שריר וחיטוב" : "Build muscle & tone"}>{isHe ? "בניית שריר וחיטוב" : "Build muscle & tone"}</option>
+                    <option value={isHe ? "שיפור כושר וסיבולת" : "Improve fitness & endurance"}>{isHe ? "שיפור כושר וסיבולת" : "Improve fitness & endurance"}</option>
+                    <option value={isHe ? "תזונה נכונה ואורח חיים בריא" : "Healthy nutrition & lifestyle"}>{isHe ? "תזונה נכונה ואורח חיים בריא" : "Healthy nutrition & lifestyle"}</option>
+                    <option value={isHe ? "חזרה לכושר אחרי הפסקה" : "Getting back after a break"}>{isHe ? "חזרה לכושר אחרי הפסקה" : "Getting back after a break"}</option>
+                    <option value={isHe ? "אחר" : "Other"}>{isHe ? "אחר" : "Other"}</option>
+                  </select>
+                </div>
+
+                {validationError && (
+                  <p className="text-sm text-red-500">{validationError}</p>
+                )}
+
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="w-full py-3.5 bg-[var(--brand-orange)] text-[#F5F4F0] rounded-lg font-bold text-base hover:bg-[var(--brand-orange-light)] transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    isHe ? "שולח..." : "Submitting..."
+                  ) : (
+                    <>
+                      <Send size={18} />
+                      {isHe ? "שלח — ואני אחזור אליך" : "Send — and I'll get back to you"}
+                    </>
+                  )}
+                </button>
+              </div>
+            </FadeIn>
+          )}
+        </div>
+      </section>
+
+      {/* ===== FOOTER ===== */}
+      <footer className="py-6 px-6 text-center text-xs text-[var(--text-muted)]">
+        <p>© {new Date().getFullYear()} Arik Moz</p>
+      </footer>
     </div>
   );
 }
