@@ -119,24 +119,23 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           className="max-w-xl w-full text-center"
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] leading-tight mb-8">
+          <h1 className="text-3xl md:text-5xl font-bold text-[var(--text-primary)] leading-tight mb-6">
             {isHe
-              ? "הגעתם לפה כי משהו עד עכשיו לא עבד."
-              : "You're here because something hasn't worked until now."}
+              ? "הכל מתחיל ונגמר בראש."
+              : "It all starts and ends in your head."}
           </h1>
 
-          <div className="text-base md:text-lg text-[var(--text-muted)] leading-relaxed space-y-2">
-            <p>{isHe ? "אולי ירדת במשקל — וחזרת." : "Maybe you lost weight — and gained it back."}</p>
-            <p>{isHe ? "אולי התחלת — ועצרת." : "Maybe you started — and stopped."}</p>
-            <p>{isHe ? "אולי כבר מתאמנים שנים ועדיין לא שם." : "Maybe you've been training for years and still aren't there."}</p>
-          </div>
+          <p className="text-base md:text-lg text-[var(--text-muted)] leading-relaxed">
+            {isHe
+              ? "תקועים. לא רואים תוצאות. לא משתפרים. או לא יודעים איפה להתחיל."
+              : "Stuck. Not seeing results. Not improving. Or not sure where to start."}
+          </p>
 
-          <div className="mt-10 text-base md:text-lg text-[var(--text-primary)] leading-relaxed space-y-1">
-            <p>{isHe ? "זה לא בגללכם." : "It's not because you're weak."}</p>
+          <div className="mt-8 text-lg md:text-xl text-[var(--text-primary)] leading-relaxed">
             <p className="text-[var(--brand-orange)] font-semibold">
               {isHe
-                ? "זה בגלל שאף אחד לא בנה תוכנית שמתאימה לכם — ולחיים שיש לכם."
-                : "It's because no one built you a plan that fits you — and the life you have."}
+                ? "אני פה להעביר לכם את כל הידע לגרסה הכי בריאה וחזקה של עצמכם."
+                : "I'm here to give you everything you need to become the strongest, healthiest version of yourself."}
             </p>
           </div>
 
@@ -174,7 +173,7 @@ export default function Home() {
                   {isHe ? "אני אריק." : "I'm Arik."}
                 </div>
                 <div className="text-sm text-[var(--text-muted)]">
-                  {isHe ? "+15 שנים של ניסיון בכושר, תזונה ובריאות 💪🏼" : "15+ years of experience in fitness, nutrition & health 💪🏼"}
+                  {isHe ? "+15 שנים של אימונים, ליווי, וטעויות שעברתי בדרך 💪🏼" : "15+ years of training, coaching & lessons learned the hard way 💪🏼"}
                 </div>
               </div>
             </div>
@@ -182,56 +181,78 @@ export default function Home() {
 
           <FadeIn delay={0.15}>
             <div className="text-base md:text-lg text-[var(--text-primary)] leading-relaxed space-y-3">
-              <p>{isHe ? "אני לא בונה גוף תוצאה לרגע." : "I don't build bodies for a moment."}</p>
-              <p className="font-semibold">
-                {isHe ? "אני בונה גוף תוצאה שנשאר איתכם לעבוד בעוד 20 שנה." : "I build bodies that still work in 20 years."}
+              <p>
+                {isHe
+                  ? "מה שתקבלו פה זה כל הסודות הלא כתובים — מהניסיון האישי שלי ושל המתאמנים והמתאמנות שאימנתי."
+                  : "What you'll get here are the unwritten secrets — from my own experience and from the people I've coached."}
               </p>
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={0.3}>
-            <div className="mt-8 text-base md:text-lg text-[var(--text-primary)] leading-relaxed">
-              <p>{isHe ? "כוח. סיבולת. תנועה. תזונה. בריאות. אריחות ימים. ראש" : "Strength. Endurance. Movement. Nutrition. Mindset."}</p>
-              <p className="text-[var(--brand-orange)] font-semibold mt-1">
-                {isHe ? "הכל ביחד — כי אף אחד מהם לא עובד לבד." : "Together — because none of them work alone."}
+              <p className="font-semibold">
+                {isHe
+                  ? "אני לא בונה תוצאה לרגע. אני בונה גוף שעובד גם בעוד 20 שנה."
+                  : "I'm not building a result for the moment. I'm building a body that still works in 20 years."}
               </p>
             </div>
           </FadeIn>
         </div>
       </section>
 
-      {/* ===== WHAT YOU GET ===== */}
+      {/* ===== FOR WHOM ===== */}
       <section className="py-20 px-6 bg-[var(--bg-card)]">
+        <div className="max-w-xl mx-auto text-center">
+          <FadeIn>
+            <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-4">
+              {isHe ? "השיטה מתאימה לכולם." : "The method works for everyone."}
+            </h2>
+            <p className="text-base md:text-lg text-[var(--text-muted)] leading-relaxed">
+              {isHe
+                ? "גברים ונשים. מתחילים בלי ניסיון או מנוסים שתקועים. כל גיל, כל לוז."
+                : "Men and women. Total beginners or experienced and stuck. Any age, any schedule."}
+            </p>
+            <p className="mt-4 text-base md:text-lg text-[var(--text-primary)] font-semibold">
+              {isHe
+                ? "כי הליווי בנוי אישית — לחיים שלכם, לצרכים שלכם, למטרות שלכם."
+                : "Because every program is built personally — for your life, your needs, your goals."}
+            </p>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ===== WHAT YOU GET ===== */}
+      <section className="py-20 px-6">
         <div className="max-w-xl mx-auto">
           <FadeIn>
             <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-3">
               {isHe ? "ליווי 1 על 1 אישי" : "Personal 1-on-1 Coaching"}
             </h2>
             <p className="text-[var(--text-muted)] mb-10">
-              {isHe ? "לא תוכנית מהאינטרנט." : "Not a plan from the internet."}
+              {isHe ? "לא תוכנית מהאינטרנט. לא PDF. אני." : "Not a plan from the internet. Not a PDF. Me."}
             </p>
           </FadeIn>
 
           <div className="space-y-5">
             {[
               {
-                he: "תוכנית אימונים שבנויה סביב החיים שלך",
-                en: "A training plan built around your life",
+                he: "תוכנית אימונים ותזונה שאפשר לחיות איתה",
+                en: "Training and nutrition you can actually live with",
               },
               {
-                he: "תזונה שאפשר לחיות איתה — לא רק שבועיים",
-                en: "Nutrition you can live with — not just for two weeks",
+                he: "קשר מוח־שריר: איך לאתגר ולהטיש כל שריר נכון",
+                en: "Mind–muscle connection: how to challenge and recruit every muscle properly",
               },
               {
-                he: "מעקב שבועי ושינויים בזמן אמת",
-                en: "Weekly tracking and real-time adjustments",
+                he: "מה לאכול, על מה לדלג, איך לשמר חיטוב ומסת שריר",
+                en: "What to eat, what to skip, how to keep your tone and muscle mass",
               },
               {
-                he: "אני זמין. לא בוט. לא PDF.",
-                en: "I'm available. Not a bot. Not a PDF.",
+                he: "מעקב, תיעוד והתאמות בזמן אמת לאורך כל הדרך",
+                en: "Tracking, documentation and real-time adjustments along the way",
+              },
+              {
+                he: "זמין תמיד — לכל שאלה, לכל טיפ, לכל רגע שאתם צריכים",
+                en: "Always available — for every question, every tip, every moment you need",
               },
             ].map((item, i) => (
-              <FadeIn key={i} delay={i * 0.1}>
+              <FadeIn key={i} delay={i * 0.08}>
                 <div className="flex items-start gap-3" dir={isHe ? "rtl" : "ltr"}>
                   <div className="mt-0.5 w-6 h-6 rounded-full bg-[var(--brand-orange)] flex items-center justify-center flex-shrink-0">
                     <Check size={14} className="text-white" />
@@ -243,27 +264,45 @@ export default function Home() {
               </FadeIn>
             ))}
           </div>
+        </div>
+      </section>
 
-          <FadeIn delay={0.5}>
-            <div className="mt-12 text-base md:text-lg text-[var(--text-primary)] leading-relaxed space-y-1">
-              <p>{isHe ? "תוך פחות מ-90 ימים תרגישו את זה." : "Within 90 days you'll feel it."}</p>
-              <p className="text-[var(--brand-orange)] font-bold text-lg md:text-xl">
-                {isHe ? "לשארית החיים — תחיו את זה." : "For the rest of your life — you'll live it."}
-              </p>
-            </div>
+      {/* ===== RESULTS ===== */}
+      <section className="py-20 px-6 bg-[var(--bg-card)]">
+        <div className="max-w-xl mx-auto text-center">
+          <FadeIn>
+            <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-8">
+              {isHe ? "מה תוציאו מזה" : "What you'll get out of it"}
+            </h2>
+          </FadeIn>
+
+          <FadeIn delay={0.1}>
+            <p className="text-base md:text-lg text-[var(--text-primary)] leading-relaxed">
+              {isHe
+                ? "פיסול גוף · מסת שריר · שריפת שומן · ביצועים אתלטיים · גמישות · מניעת פציעות · שינה · פוקוס · הרגשה כללית."
+                : "Body sculpting · muscle mass · fat burn · athletic performance · flexibility · injury prevention · sleep · focus · how you feel overall."}
+            </p>
+          </FadeIn>
+
+          <FadeIn delay={0.25}>
+            <p className="mt-8 text-lg md:text-xl text-[var(--brand-orange)] font-bold leading-relaxed">
+              {isHe
+                ? "ומעבר לזה — בריאות ואריכות ימים גם בגיל הזקנה."
+                : "And beyond all that — health and longevity, well into old age."}
+            </p>
           </FadeIn>
         </div>
       </section>
 
-      {/* ===== SOCIAL PROOF + CTA ===== */}
+      {/* ===== CLOSING ===== */}
       <section className="py-20 px-6">
         <div className="max-w-xl mx-auto text-center">
           <FadeIn>
             <p className="text-base md:text-lg text-[var(--text-muted)] leading-relaxed">
-              {isHe ? "רוב הלקוחות שלי הגיעו אחרי שכבר ניסו." : "Most of my clients came after they already tried."}
+              {isHe ? "אם זה מצלצל מוכר — אתם במקום הנכון." : "If any of this sounds familiar — you're in the right place."}
             </p>
-            <p className="text-base md:text-lg text-[var(--text-primary)] font-semibold mt-1">
-              {isHe ? "זה בדיוק הנקודה שממנה אנחנו מתחילים." : "That's exactly where we start."}
+            <p className="mt-2 text-lg md:text-xl text-[var(--text-primary)] font-semibold">
+              {isHe ? "חבל על כל רגע שדוחים את זה." : "Don't waste another day pushing it off."}
             </p>
           </FadeIn>
         </div>
@@ -333,7 +372,7 @@ export default function Home() {
                       setValidationError("");
                     }}
                     placeholder={isHe ? "050-123-4567" : "555-0123"}
-                    className="w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] placeholder-[var(--placeholder-color)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors"
+                    className={`w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] placeholder-[var(--placeholder-color)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors ${isHe ? "text-right" : "text-left"}`}
                   />
                 </div>
 
@@ -348,7 +387,7 @@ export default function Home() {
                     onChange={(e) => { setEmail(e.target.value); setValidationError(""); }}
                     placeholder={isHe ? "name@example.com" : "name@example.com"}
                     dir="ltr"
-                    className="w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] placeholder-[var(--placeholder-color)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors"
+                    className={`w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] placeholder-[var(--placeholder-color)] focus:outline-none focus:border-[var(--brand-orange)] transition-colors ${isHe ? "text-right" : "text-left"}`}
                   />
                 </div>
 
